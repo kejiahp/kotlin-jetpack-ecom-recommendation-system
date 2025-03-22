@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -63,6 +65,7 @@ fun SignUpScreen(
     val toastCtx = LocalContext.current
     var locationExpanded by remember { mutableStateOf(false) }
     var genderExpanded by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
     val resData by signUpViewModel.resData.collectAsState()
     val formState by signUpViewModel.formState.collectAsState()
@@ -98,7 +101,7 @@ fun SignUpScreen(
     // Show message on signup success
     resData?.let {
         LaunchedEffect(it) {
-            if (errorMsg.isNotEmpty()) {
+            if (it.message.isNotEmpty()) {
                 Toast.makeText(
                     toastCtx,
                     it.message,
@@ -111,10 +114,11 @@ fun SignUpScreen(
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp)
     ) {
         Column(
             modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(10.dp)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -202,7 +206,7 @@ fun SignUpScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 CustomText(
-                    "To ensure full anonymity, use the button below to fill the form with random user data",
+                    "To ensure full anonymity, use the button below to fill the form with random user data. Emails provided are also not stored in the system, they are only used to send your authentication details.",
                     fontSize = 14.sp
                 )
 

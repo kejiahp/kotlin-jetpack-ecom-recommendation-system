@@ -1,6 +1,7 @@
 package com.example.mobile.auth.signup
 
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobile.core.utilites.CoreUtils
@@ -140,6 +141,7 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
                             _isLoading.value = true
                         }
                         is ResourceState.Success -> {
+                            Log.d(TAG,signupRes.data.toString())
                             _isLoading.value = false
                             _resData.value = signupRes.data
                             _errorMsg.value = ""
@@ -159,10 +161,8 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
      * */
     fun randomUserData() {
         _formState.value =  _formState.value.copy(
-            email="popoolakejiah@gmail.com",
-            age = 18,
-            username = "kejiah",
-            isValid = true
+            age = CoreUtils.randomAgeGenerator(),
+            username = CoreUtils.randomUsernameGenerator(),
         )
     }
 
@@ -199,3 +199,4 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
         const val TAG = "SignUpViewModel"
     }
 }
+

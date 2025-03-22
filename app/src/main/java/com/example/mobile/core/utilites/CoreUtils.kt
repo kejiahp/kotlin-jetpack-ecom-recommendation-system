@@ -8,6 +8,8 @@ import androidx.annotation.RequiresApi
 import okhttp3.ResponseBody
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.random.Random
+
 
 /**
  * JSONObject extension function that allows the conversion of JSONObjects to maps.
@@ -71,6 +73,30 @@ object CoreUtils {
             return null
         }
     }
+
+    /**
+     * Generates a random username
+     * */
+    fun randomUsernameGenerator(): String {
+        val usernamesList1 = listOf(
+            "Max", "Leo", "Eli", "Sam", "Ray",
+            "Nia", "Lia", "Kai", "Zoe", "Eva"
+        )
+        val usernamesList2 = listOf(
+            "Storm", "Wave", "Blaze", "Sky", "Frost",
+            "Echo", "Dash", "Flare", "Stone", "Hawk"
+        )
+        return "${usernamesList1.random()}${usernamesList2.random()}"
+    }
+
+
+    /**
+     * Generate a random number
+     * */
+    fun randomAgeGenerator(): Int {
+        return Random.nextInt(18, 101)
+    }
+
 
     /**
      * Utility function to check if there is an internet connection.
