@@ -6,6 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.example.mobile.auth.codereset.CodeReset
+import com.example.mobile.auth.codereset.RequestCondeResetScreen
 import com.example.mobile.auth.login.LoginScreen
 import com.example.mobile.auth.signup.SignUpScreen
 
@@ -21,6 +23,12 @@ object NavRoutes {
 
     @Serializable
     object SignUp
+
+    @Serializable
+    object RequestCondeResetScreen
+
+    @Serializable
+    object CodeReset
 }
 
 /**
@@ -39,6 +47,11 @@ fun NavGraph(modifier: Modifier, navController: NavHostController) {
         composable<NavRoutes.Login> {
             LoginScreen(navController)
         }
-
+        composable<NavRoutes.CodeReset> {
+            CodeReset(navController)
+        }
+        composable<NavRoutes.RequestCondeResetScreen> {
+            RequestCondeResetScreen(navController)
+        }
     }
 }

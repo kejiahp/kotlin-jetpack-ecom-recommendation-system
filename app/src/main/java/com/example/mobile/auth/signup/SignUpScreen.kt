@@ -1,6 +1,5 @@
 package com.example.mobile.auth.signup
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,16 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
@@ -29,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobile.core.CustomText
@@ -45,19 +40,15 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mobile.core.CoreConstants
 import com.example.mobile.core.CustomButton
 import com.example.mobile.core.CustomExposedDropdownMenu
-import com.example.mobile.core.Loader
 import com.example.mobile.core.LoaderButton
-import com.example.mobile.core.LoaderScreen
 import com.example.mobile.core.StyledOutlinedTextField
-import com.example.mobile.core.utilites.CoreUtils
-import com.example.mobile.core.utilites.ResourceState
+import com.example.mobile.core.navigation.NavRoutes
 
-const val TAG = "SignUpScreen"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
-    navController: NavController = rememberNavController(),
+    navController: NavController,
     signUpViewModel: SignUpViewModel = hiltViewModel()
 ) {
     val countryList = CoreConstants.countryList
@@ -228,21 +219,8 @@ fun SignUpScreen(
                 ) {
                     CustomText("Sign Up", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
-                TextButton(onClick = { println("Already have an account clicked") }) { CustomText("Already have an account?") }
+                TextButton(onClick = { navController.navigate(NavRoutes.Login) }) { CustomText("Already have an account?") }
             }
         }
-    }
-}
-
-
-@Preview(name = "signup screen", showBackground = true)
-@Composable
-fun SignUpScreenPreview() {
-    LoaderButton(
-        isLoading = true,
-        enabled = true,
-        onClickBtn = {}
-    ) {
-        CustomText("Sign Up", fontWeight = FontWeight.Bold, fontSize = 16.sp)
     }
 }

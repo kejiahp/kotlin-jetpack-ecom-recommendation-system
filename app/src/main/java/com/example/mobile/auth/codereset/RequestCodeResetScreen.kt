@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -29,20 +31,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.mobile.core.BackButtonWithTitle
 
 @Composable
-fun RequestCondeResetScreen() {
-    var username by remember {mutableStateOf("")}
+fun RequestCondeResetScreen(navController: NavController = rememberNavController()) {
+    var username by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(10.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                BackButtonWithTitle("Request Reset Token") { println("Reset Code Back Button Clicked") }
+                BackButtonWithTitle(
+                    "Request Reset Token",
+                    onBackClick = { navController.popBackStack() })
 
                 CustomText(
                     text = "Enter your username and email address, if the provided username exists in the system code reset token will be sent to the provided email address.",
@@ -89,7 +101,7 @@ fun RequestCondeResetScreen() {
     }
 }
 
-@Preview(name="request code reset screen", showBackground = true)
+@Preview(name = "request code reset screen", showBackground = true)
 @Composable
 fun RequestCondeResetScreenPreview() {
     RequestCondeResetScreen()

@@ -128,7 +128,6 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
         // `viewModelScope.launch` builds a co-routine without blocking the current thread
         // `Dispatchers.IO` specifies the co-routine should be running on the `Dispatchers.IO` dispatcher in background thread
         viewModelScope.launch(Dispatchers.IO) {
-//                .collectLatest { signupRes -> _resData.value = signupRes }
             signUpRepository.registerUser(userData)
                 .collectLatest { signupRes ->
                     when (signupRes) {

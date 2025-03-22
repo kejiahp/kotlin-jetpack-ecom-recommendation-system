@@ -26,12 +26,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.mobile.core.CustomText
 import com.example.mobile.core.PasswordTextField
 import com.example.mobile.core.StyledOutlinedTextField
+import com.example.mobile.core.navigation.NavRoutes
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController = rememberNavController()) {
     var username by remember { mutableStateOf("") }
 
     Surface(
@@ -62,7 +64,11 @@ fun LoginScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                PasswordTextField(labelText="Code", placeholderText="Enter your Code", password = username, onChangePassword = { username = it })
+                PasswordTextField(
+                    labelText = "Code",
+                    placeholderText = "Enter your Code",
+                    password = username,
+                    onChangePassword = { username = it })
             }
 
             Column(
@@ -75,8 +81,12 @@ fun LoginScreen(navController: NavController) {
                     onClick = { println("Login clicked") }) {
                     CustomText("Login", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
-                TextButton(onClick = { println("Don't have an account sign up clicked") }) { CustomText("Don't have an account?") }
-                TextButton(onClick = { println("Forgot your clicked") }) { CustomText("Forgot your code?") }
+                TextButton(onClick = { navController.navigate(NavRoutes.SignUp) }) { CustomText("Don't have an account?") }
+                TextButton(onClick = { navController.navigate(NavRoutes.RequestCondeResetScreen) }) {
+                    CustomText(
+                        "Forgot your code?"
+                    )
+                }
             }
         }
     }

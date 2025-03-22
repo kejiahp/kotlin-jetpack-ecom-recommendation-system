@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -31,6 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.mobile.core.CustomText
 import com.example.mobile.core.StyledOutlinedTextField
 import com.example.mobile.R
@@ -39,17 +43,23 @@ import com.example.mobile.core.BackButtonWithTitle
 import com.example.mobile.core.PasswordTextField
 
 @Composable
-fun CodeReset() {
+fun CodeReset(navController: NavController = rememberNavController()) {
     var username by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(10.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                BackButtonWithTitle("Reset Code") { println("Reset Code Back Button Clicked") }
+                BackButtonWithTitle("Reset Code", onBackClick = { navController.popBackStack() })
 
                 CustomText(
                     text = "Enter the reset token sent to your email address, your old code and your new code",
