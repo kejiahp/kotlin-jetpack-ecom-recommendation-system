@@ -10,14 +10,3 @@ data class ApiResponse<T>(
     val success: Boolean,
     val data: T
 )
-
-data class ErrorResponseDetails(
-    val message: String,
-    @SerializedName("status_code")
-    val statusCode: Int,
-    val success: Boolean,
-)
-
-data class ErrorResponse(
-    val detail: ErrorResponseDetails
-)

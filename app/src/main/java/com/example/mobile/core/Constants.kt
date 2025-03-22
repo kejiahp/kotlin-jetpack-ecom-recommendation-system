@@ -5,7 +5,7 @@ object CoreConstants {
     // If you’re testing on an Android Emulator, 127.0.0.1 refers to the emulator itself, not your host machine. You should replace 127.0.0.1 with 10.0.2.2, which maps to your actual local server.
     const val BASE_URL = "http://10.0.2.2:8000"
 
-    val genderList: List<String> = listOf("Male", "Female")
+    val genderList: List<String> = listOf("male", "memale")
 
     val countryList: List<String> = listOf(
         "Nigeria",

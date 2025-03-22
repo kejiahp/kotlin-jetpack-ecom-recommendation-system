@@ -34,6 +34,7 @@ import com.example.mobile.core.CustomText
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -65,6 +66,8 @@ fun SignUpScreen(
 
     val resData by signUpViewModel.resData.collectAsState()
     val formState by signUpViewModel.formState.collectAsState()
+    val errorMsg by signUpViewModel.errorMsg.collectAsState()
+    val isLoading by signUpViewModel.isLoading.collectAsState()
 
     formState.gender.let {
         LaunchedEffect(it) {
@@ -81,23 +84,27 @@ fun SignUpScreen(
         }
     }
 
-
-    when(resData) {
-        is ResourceState.Loading -> {
-            Log.d(TAG, "Loading")
-        }
-        is ResourceState.Success -> {
-            Log.d(TAG, "Success")
-            CoreUtils.printDebugger(TAG, (resData as ResourceState.Success<RegisterResponse>).data)
-        }
-        is ResourceState.Error -> {
-            Log.d(TAG, "Error")
+    // Show error message on signup fail
+    LaunchedEffect(errorMsg) {
+        if (errorMsg.isNotEmpty()) {
             Toast.makeText(
                 toastCtx,
-                (resData as ResourceState.Error<RegisterResponse>).error.toString(),
+                errorMsg,
                 Toast.LENGTH_LONG
             ).show()
-            CoreUtils.printDebugger(TAG, (resData as ResourceState.Error<RegisterResponse>).error.toString())
+        }
+    }
+
+    // Show message on signup success
+    resData?.let {
+        LaunchedEffect(it) {
+            if (errorMsg.isNotEmpty()) {
+                Toast.makeText(
+                    toastCtx,
+                    it.message,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -194,10 +201,13 @@ fun SignUpScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                CustomText("To ensure full anonymity, use the button below to fill the form with random user data", fontSize = 14.sp)
+                CustomText(
+                    "To ensure full anonymity, use the button below to fill the form with random user data",
+                    fontSize = 14.sp
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
-                CustomButton (onClickBtn = signUpViewModel::randomUserData) {
+                CustomButton(onClickBtn = signUpViewModel::randomUserData) {
                     CustomText("Use Random")
                 }
             }
@@ -205,9 +215,12 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (errorMsg.isNotEmpty()) {
+                    CustomText(errorMsg, color = Color.Red)
+                }
                 LoaderButton(
-                    isLoading = false,
-                    onClickBtn = {signUpViewModel.onSubmitHandler()}
+                    isLoading = isLoading,
+                    onClickBtn = { signUpViewModel.onSubmitHandler() }
                 ) {
                     CustomText("Sign Up", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }

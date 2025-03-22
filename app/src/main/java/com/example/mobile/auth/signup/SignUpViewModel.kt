@@ -1,7 +1,6 @@
 package com.example.mobile.auth.signup
 
-import android.util.Log
-import android.widget.Toast
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobile.core.utilites.CoreUtils
@@ -50,10 +49,14 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
     val formState = _formState.asStateFlow()
 
     /** Register/SignUp API call response state state */
-    private val _resData: MutableStateFlow<ResourceState<RegisterResponse>> = MutableStateFlow(
-        ResourceState.Loading()
-    )
+    private val _resData: MutableStateFlow<RegisterResponse?> = MutableStateFlow(null)
     val resData = _resData.asStateFlow()
+
+    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    private val _errorMsg: MutableStateFlow<String> = MutableStateFlow("")
+    val errorMsg = _errorMsg.asStateFlow()
 
     /**
      * Validate email
@@ -124,8 +127,30 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
         // `viewModelScope.launch` builds a co-routine without blocking the current thread
         // `Dispatchers.IO` specifies the co-routine should be running on the `Dispatchers.IO` dispatcher in background thread
         viewModelScope.launch(Dispatchers.IO) {
+//                .collectLatest { signupRes -> _resData.value = signupRes }
             signUpRepository.registerUser(userData)
-                .collectLatest { signupRes -> _resData.value = signupRes }
+                .collectLatest { signupRes ->
+                    when (signupRes) {
+                        is ResourceState.Pending -> {
+                            _isLoading.value = false
+                            _resData.value = null
+                            _errorMsg.value = ""
+                        }
+                        is ResourceState.Loading -> {
+                            _isLoading.value = true
+                        }
+                        is ResourceState.Success -> {
+                            _isLoading.value = false
+                            _resData.value = signupRes.data
+                            _errorMsg.value = ""
+                        }
+                        is ResourceState.Error -> {
+                            _isLoading.value = false
+                            _errorMsg.value = signupRes.error.toString()
+                        }
+                    }
+
+                }
         }
     }
 
