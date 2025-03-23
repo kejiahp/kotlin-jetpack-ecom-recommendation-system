@@ -82,12 +82,15 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
-    implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
+//    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
+//    implementation("com.squareup.retrofit2:converter-moshi:2.11.0")
 
     // Jetpack compose and Coroutine setup
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
+
+    // Jetpack compose and AndroidX Security library using Security Crypto
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }
 
 // Jetpack compose and Hilt Configurations

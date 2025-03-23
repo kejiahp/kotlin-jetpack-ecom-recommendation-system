@@ -1,9 +1,9 @@
 package com.example.mobile.auth.signup
 
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mobile.core.CoreConstants
 import com.example.mobile.core.utilites.CoreUtils
 import com.example.mobile.core.utilites.ResourceState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,9 +53,11 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
     private val _resData: MutableStateFlow<RegisterResponse?> = MutableStateFlow(null)
     val resData = _resData.asStateFlow()
 
+    /** Loading state*/
     private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
+    /** Error message */
     private val _errorMsg: MutableStateFlow<String> = MutableStateFlow("")
     val errorMsg = _errorMsg.asStateFlow()
 
@@ -118,7 +120,6 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
                 location = _formState.value.location,
                 gender = _formState.value.gender
             )
-            CoreUtils.printDebugger(TAG, registerReq)
             registerUser(registerReq)
         }
     }
@@ -140,7 +141,6 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
                             _isLoading.value = true
                         }
                         is ResourceState.Success -> {
-                            Log.d(TAG,signupRes.data.toString())
                             _isLoading.value = false
                             _resData.value = signupRes.data
                             _errorMsg.value = ""
@@ -160,6 +160,8 @@ class SignUpViewModel @Inject constructor(private val signUpRepository: SignUpRe
      * */
     fun randomUserData() {
         _formState.value =  _formState.value.copy(
+            location = CoreConstants.countryList.random(),
+            gender = CoreConstants.genderList.random(),
             age = CoreUtils.randomAgeGenerator(),
             username = CoreUtils.randomUsernameGenerator(),
         )

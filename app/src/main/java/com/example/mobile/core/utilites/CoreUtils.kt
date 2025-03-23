@@ -79,12 +79,12 @@ object CoreUtils {
      * */
     fun randomUsernameGenerator(): String {
         val usernamesList1 = listOf(
-            "Max", "Leo", "Eli", "Sam", "Ray",
-            "Nia", "Lia", "Kai", "Zoe", "Eva"
+            "max", "leo", "eli", "sam", "ray",
+            "nia", "lia", "kai", "zoe", "eva"
         )
         val usernamesList2 = listOf(
-            "Storm", "Wave", "Blaze", "Sky", "Frost",
-            "Echo", "Dash", "Flare", "Stone", "Hawk"
+            "storm", "wave", "blaze", "sky", "frost",
+            "echo", "dash", "flare", "stone", "hawk"
         )
         return "${usernamesList1.random()}${usernamesList2.random()}"
     }

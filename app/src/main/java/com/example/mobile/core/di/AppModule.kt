@@ -1,26 +1,29 @@
 package com.example.mobile.core.di
 
-import android.util.Log
+import android.content.Context
+import com.example.mobile.auth.login.LoginApiService
+import com.example.mobile.auth.login.LoginDataSource
+import com.example.mobile.auth.login.LoginDataSourceInterface
+import com.example.mobile.auth.login.LoginRepository
 import com.example.mobile.auth.signup.SignUpApiService
 import com.example.mobile.auth.signup.SignUpDataSource
 import com.example.mobile.auth.signup.SignUpDataSourceImpl
 import com.example.mobile.auth.signup.SignUpRepository
 import com.example.mobile.core.CoreConstants
-import com.example.mobile.core.utilites.CoreUtils
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.example.mobile.core.auth.AuthDeletePreferenceOnBadToken
+import com.example.mobile.core.auth.AuthInterceptor
+import com.example.mobile.core.auth.AuthPreferenceService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
-
 
 /***
  * The `@Module` annotation allows the definition of third party dependencies with the class
@@ -31,6 +34,18 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class AppModule {
     /**
+     * AuthPreferenceService dependency definition
+     *
+     *
+     * This will pass the application context to the authPreference service, without leaking memory
+     * */
+    @Provides
+    @Singleton
+    fun providesAuthPreferenceService(@ApplicationContext context: Context): AuthPreferenceService {
+        return AuthPreferenceService(context = context)
+    }
+
+    /**
      * Retrofit object definition
      *
      * The `@Provides` annotation creates provider method binding.
@@ -38,7 +53,7 @@ class AppModule {
      * */
     @Provides
     @Singleton
-    fun providesRetrofit(): Retrofit {
+    fun providesRetrofit(authPreferenceService: AuthPreferenceService): Retrofit {
         // To see api calls and responses within LogCat
         // the `apply` scope function allows the configuration of an object within a block and return the object itself
         val httpLoggingInterceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
@@ -48,17 +63,13 @@ class AppModule {
         // Defining an httpclient to be used together with retrofit
         val httpClient = OkHttpClient().newBuilder().apply {
             addInterceptor(httpLoggingInterceptor)
+            // add `Authorization` header
+            addInterceptor(AuthInterceptor(authPreferenceService.authUser.value?.tkn))
+            // if status code 403, delete auth token
+            addInterceptor(AuthDeletePreferenceOnBadToken(authPreferenceService::removeLoginResData))
         }
         // Timeout each request in 120 seconds
         httpClient.readTimeout(120, TimeUnit.SECONDS)
-
-        // Defining the moshi adapter
-//        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-
-        // Return the Retrofit object
-        // Moshi didn't work so I fell back to GsonConverter
-//        return Retrofit.Builder().baseUrl(CoreConstants.BASE_URL).client(httpClient.build())
-//            .addConverterFactory(MoshiConverterFactory.create(moshi)).build()
 
         return Retrofit.Builder().baseUrl(CoreConstants.BASE_URL).client(httpClient.build())
             .addConverterFactory(GsonConverterFactory.create()).build()
@@ -95,5 +106,35 @@ class AppModule {
     @Singleton
     fun providesSignUpRepository(signUpDataSource: SignUpDataSource): SignUpRepository {
         return SignUpRepository(signUpDataSource)
+    }
+
+    /** LoginApiService dependency definition
+     *
+     * This allows the use of `LoginApiService` through dependency injection
+     * */
+    @Provides
+    @Singleton
+    fun providesLoginApiService(retrofit: Retrofit): LoginApiService {
+        return retrofit.create(LoginApiService::class.java)
+    }
+
+    /** LoginDataSource dependency definition
+     *
+     * This allows the use of `LoginDataSource` through dependency injection
+     * */
+    @Provides
+    @Singleton
+    fun providesLoginDataSource(loginApiService: LoginApiService): LoginDataSourceInterface {
+        return LoginDataSource(loginApiService)
+    }
+
+    /** LoginRepository dependency definition
+     *
+     * This allows the use of `LoginRepository` through dependency injection
+     * */
+    @Provides
+    @Singleton
+    fun providesLoginRepository(loginDataSource: LoginDataSource): LoginRepository {
+        return LoginRepository(loginDataSource)
     }
 }

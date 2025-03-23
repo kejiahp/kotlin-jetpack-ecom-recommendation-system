@@ -99,6 +99,10 @@ fun SignUpScreen(
                     Toast.LENGTH_LONG
                 ).show()
             }
+            if(it.success) {
+                // navigate to the login screen if authentication is successful
+                navController.navigate(NavRoutes.Login)
+            }
         }
     }
 
@@ -197,7 +201,7 @@ fun SignUpScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 CustomText(
-                    "To ensure full anonymity, use the button below to fill the form with random user data. Emails provided are also not stored in the system, they are only used to send your authentication details.",
+                    "To ensure full anonymity, use the button below to fill the form with random user data. Emails provided are also not stored in the system, they are only used to send your authentication details. An email containing your authentication details will be sent to you.",
                     fontSize = 14.sp
                 )
 
