@@ -8,11 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,7 +36,7 @@ import com.example.mobile.core.PasswordTextField
 import com.example.mobile.core.StyledOutlinedTextField
 import com.example.mobile.core.auth.AuthViewModel
 import com.example.mobile.core.navigation.NavRoutes
-import com.example.mobile.core.utilites.CoreUtils
+
 
 @Composable
 fun LoginScreen(
@@ -53,7 +50,6 @@ fun LoginScreen(
     val isLoading by loginViewModel.isLoading.collectAsState()
     val errorMsg by loginViewModel.errorMsg.collectAsState()
     val authUser by authViewModel.authUser.collectAsState()
-
 
     // Show error message on signup fail
     LaunchedEffect(errorMsg) {
@@ -79,7 +75,6 @@ fun LoginScreen(
             if (it.success) {
                 // update authenticated user data
                 authViewModel.updateAuthUser(it.data)
-                CoreUtils.printDebugger("LoginScreen", authUser)
 
                 // navigate to product listing screen
 //                navController.navigate()
@@ -133,39 +128,6 @@ fun LoginScreen(
                 if (errorMsg.isNotEmpty()) {
                     CustomText(errorMsg, color = Color.Red)
                 }
-                authUser?.let{
-                    it ->
-                    CustomText(it.username)
-                }
-                Button(onClick = {
-                    /*
-
-                             LoginData(
-                            id = "67dff224ffa4cd10f481b5b2",
-                            username = "kejiah",
-                            location = "Nigeria",
-                            age = 22,
-                            gender = "male",
-                            createdAt = "2025-03-23T11:36:04.119000",
-                            updateAt = "2025-03-23T11:36:04.119000",
-                            tkn = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM0Mzg2MDUsInN1YiI6Ik5vbmUifQ._4-OTz9yC1PSOJigDafIgaRyTgXghUCl95a-3EF72g4"
-                        )
-
-                    */
-                    authViewModel.updateAuthUser(
-                        LoginData(
-                            id = "67dff224ffa4cd10f481b5b2",
-                            username = "JAMES",
-                            location = "Nigeria",
-                            age = 22,
-                            gender = "male",
-                            createdAt = "2025-03-23T11:36:04.119000",
-                            updateAt = "2025-03-23T11:36:04.119000",
-                            tkn = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM0Mzg2MDUsInN1YiI6Ik5vbmUifQ._4-OTz9yC1PSOJigDafIgaRyTgXghUCl95a-3EF72g4"
-                        )
-                    )
-                }) { CustomText("Change") }
-
                 LoaderButton(
                     isLoading = isLoading,
                     onClickBtn = { loginViewModel.onLoginHandler() }
@@ -183,9 +145,3 @@ fun LoginScreen(
     }
 }
 
-
-@Preview(name = "Login screen", showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-//    LoginScreen()
-}

@@ -10,3 +10,9 @@ data class ApiResponse<T>(
     val success: Boolean,
     val data: T
 )
+
+data class DataQueryState<T>(
+    val isLoading: Boolean = false,
+    val data: T? = null,
+    val errorMsg: String = ""
+)

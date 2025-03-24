@@ -1,6 +1,10 @@
 package com.example.mobile.core.di
 
 import android.content.Context
+import com.example.mobile.auth.codereset.CodeResetApiService
+import com.example.mobile.auth.codereset.CodeResetDataSource
+import com.example.mobile.auth.codereset.CodeResetDataSourceInterface
+import com.example.mobile.auth.codereset.CodeResetRepository
 import com.example.mobile.auth.login.LoginApiService
 import com.example.mobile.auth.login.LoginDataSource
 import com.example.mobile.auth.login.LoginDataSourceInterface
@@ -136,5 +140,32 @@ class AppModule {
     @Singleton
     fun providesLoginRepository(loginDataSource: LoginDataSource): LoginRepository {
         return LoginRepository(loginDataSource)
+    }
+
+    /**
+     * CodeResetApiService dependency definition
+     * */
+    @Provides
+    @Singleton
+    fun providesCodeResetApiService(retrofit: Retrofit): CodeResetApiService {
+        return retrofit.create(CodeResetApiService::class.java)
+    }
+
+    /**
+     * CodeResetDataSource dependency definition
+     * */
+    @Provides
+    @Singleton
+    fun providesCodeResetDataSource(codeResetApiService: CodeResetApiService): CodeResetDataSourceInterface {
+        return CodeResetDataSource(codeResetApiService)
+    }
+
+    /**
+     * CodeResetRepository dependency definition
+     * */
+    @Provides
+    @Singleton
+    fun providesCodeResetRepository(codeResetDataSource: CodeResetDataSource): CodeResetRepository {
+        return CodeResetRepository(codeResetDataSource)
     }
 }

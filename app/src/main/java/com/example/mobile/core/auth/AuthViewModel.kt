@@ -19,90 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 
-//@HiltViewModel
-//class AuthViewModel @Inject constructor(@ApplicationContext private val context: Context) :
-//    ViewModel() {
-//    companion object {
-//        const val PREFERENCE_KEY = "secure_prefs"
-//        const val TAG = "AuthViewModel"
-//        private const val AUTH_KEY = "auth_token"
-//    }
-//
-//    /** Authenticated user data */
-//    private val _authUser: MutableStateFlow<LoginData?> = MutableStateFlow(null)
-//    val authUser = _authUser.asStateFlow()
-//
-//    private val masterKey = MasterKey.Builder(context)
-//        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-//        .build()
-//
-//    private val sharedPreferences = EncryptedSharedPreferences.create(
-//        context,
-//        PREFERENCE_KEY,
-//        masterKey,
-//        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-//        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-//    )
-//
-//    // THIS `init` MUST COME AFTER everything APPARENTLY `init` IS EXECUTED IN THE SAME ORDER IT APPEARS IN A CLASS, INTERLEAVED WITH PROPERTY INITIALIZERS
-//    init {
-//        loadToken()
-//    }
-//
-//    /**
-//     * Serialize login data as a string
-//     * */
-//    private fun saveLoginResData(loginData: LoginData) {
-//        val loginResJson = Gson().toJson(loginData)
-//        sharedPreferences.edit().putString(AUTH_KEY, loginResJson).apply()
-//    }
-//
-//    /**
-//     * Deletes the login data from share preferences
-//     * */
-//    private fun removeLoginResData() {
-//        sharedPreferences.edit().remove(AUTH_KEY).apply()
-//    }
-//
-//    /**
-//     * Deserialize login data as a `LoginData` data class
-//     * */
-//    private fun getLoginResData(): LoginData? {
-//        val loginData = sharedPreferences.getString(AUTH_KEY, null)
-//        if (loginData != null) {
-//            return Gson().fromJson(loginData, LoginData::class.java)
-//        }
-//        return null
-//    }
-//
-//    /**
-//     * Load authenticated user on view model init
-//     * */
-//    private fun loadToken() {
-//        if (_authUser.value == null) {
-//            _authUser.value = getLoginResData() // Fetch from EncryptedSharedPreferences
-//        }
-//    }
-//
-//    /**
-//     * Update authenticated user
-//     * */
-//    fun updateAuthUser(loginData: LoginData) {
-//        saveLoginResData(loginData)
-//        _authUser.value = loginData
-//    }
-//
-//    /**
-//     * Delete authenticated user
-//     * */
-//    fun deleteAuthUser() {
-//        removeLoginResData()
-//        _authUser.value = null
-//    }
-//}
-//
-
-
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authPreferenceService: AuthPreferenceService
@@ -145,6 +61,7 @@ class AuthPreferenceService @Inject constructor(
     private val _authUser: MutableStateFlow<LoginData?> = MutableStateFlow(null)
     val authUser = _authUser.asStateFlow()
 
+    /** Listens for changes in authUser data */
     private val preferenceListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == AUTH_KEY) {
             loadToken()
@@ -167,6 +84,7 @@ class AuthPreferenceService @Inject constructor(
     // THIS `init` MUST COME AFTER everything APPARENTLY `init` IS EXECUTED IN THE SAME ORDER IT APPEARS IN A CLASS, INTERLEAVED WITH PROPERTY INITIALIZERS
     init {
         loadToken()
+        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceListener)
     }
 
     /**

@@ -6,10 +6,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.example.mobile.auth.codereset.CodeReset
+import com.example.mobile.auth.codereset.CodeResetScreen
 import com.example.mobile.auth.codereset.RequestCondeResetScreen
 import com.example.mobile.auth.login.LoginScreen
 import com.example.mobile.auth.signup.SignUpScreen
+import com.example.mobile.product.home.ProductHomeScreen
 
 import kotlinx.serialization.Serializable
 
@@ -28,7 +29,10 @@ object NavRoutes {
     object RequestCondeResetScreen
 
     @Serializable
-    object CodeReset
+    object CodeResetScreen
+
+    @Serializable
+    object ProductHomeScreen
 }
 
 /**
@@ -47,11 +51,14 @@ fun NavGraph(modifier: Modifier, navController: NavHostController) {
         composable<NavRoutes.Login> {
             LoginScreen(navController)
         }
-        composable<NavRoutes.CodeReset> {
-            CodeReset(navController)
+        composable<NavRoutes.CodeResetScreen> {
+            CodeResetScreen(navController)
         }
         composable<NavRoutes.RequestCondeResetScreen> {
             RequestCondeResetScreen(navController)
+        }
+        composable<NavRoutes.ProductHomeScreen> {
+            ProductHomeScreen(navController)
         }
     }
 }

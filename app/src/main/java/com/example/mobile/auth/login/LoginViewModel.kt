@@ -78,7 +78,7 @@ class LoginViewModel @Inject constructor(private val loginRepository: LoginRepos
      * Checking if code is six digits
      * */
     private fun validateCode(code: String): String? {
-        if (_formState.value.code.isEmpty() || _formState.value.code.length != 6) {
+        if (code.isEmpty() || code.length != 6) {
             return "code must be a 6-digit number"
         }
         val code = code.toInt()
