@@ -43,7 +43,7 @@ fun NavGraph(modifier: Modifier, navController: NavHostController) {
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = NavRoutes.SignUp
+        startDestination = NavRoutes.ProductHomeScreen
     ) {
         composable<NavRoutes.SignUp> {
             SignUpScreen(navController)

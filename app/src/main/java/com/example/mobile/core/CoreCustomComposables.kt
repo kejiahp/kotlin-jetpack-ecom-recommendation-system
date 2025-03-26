@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -39,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Modifier.Companion
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -57,6 +59,7 @@ fun CustomText(
     text: String, modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
+    lineHeight: TextUnit = TextUnit.Unspecified,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
     fontFamily: FontFamily? = null,
@@ -66,6 +69,7 @@ fun CustomText(
         modifier = modifier,
         color = color,
         fontSize = fontSize,
+        lineHeight = lineHeight,
         fontStyle = fontStyle,
         fontWeight = fontWeight,
         fontFamily = fontFamily
@@ -244,13 +248,16 @@ fun LoaderScreen() {
 fun CustomButton(
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    shape: Shape = MaterialTheme.shapes.small,
     onClickBtn: () -> Unit,
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
         enabled = enabled,
         modifier = modifier,
-        shape = RoundedCornerShape(5.dp),
+        colors = colors,
+        shape =  shape,
         onClick = onClickBtn,
         content = content
     )

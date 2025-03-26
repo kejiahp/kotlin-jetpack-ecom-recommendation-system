@@ -120,7 +120,10 @@ fun SignUpScreen(
             Column(modifier = Modifier.fillMaxWidth()) {
                 CustomText(text = "Sign Up", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.height(5.dp))
-                CustomText(text = "Create an account", fontSize = 14.sp)
+                CustomText(text = "Create an account", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+
+                Spacer(modifier = Modifier.height(5.dp))
+                CustomText(text = "An email containing your authentication details will be sent to you. Emails provided are not stored in the system, they are only used to send your authentication details.", fontSize = 12.sp, lineHeight = 15.sp)
 
                 Spacer(modifier = Modifier.height(10.dp))
                 // Username Input Field
@@ -201,11 +204,10 @@ fun SignUpScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 CustomText(
-                    "To ensure full anonymity, use the button below to fill the form with random user data. Emails provided are also not stored in the system, they are only used to send your authentication details. An email containing your authentication details will be sent to you.",
-                    fontSize = 14.sp
+                    "To ensure full anonymity, use the button below to fill the form with random user data.",
+                    fontSize = 12.sp, lineHeight = 15.sp
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
                 CustomButton(onClickBtn = signUpViewModel::randomUserData) {
                     CustomText("Use Random")
                 }
