@@ -1,26 +1,37 @@
 package com.example.mobile.core
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -29,9 +40,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -39,19 +53,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Modifier.Companion
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.example.mobile.R
 
 @Composable
@@ -60,15 +86,23 @@ fun CustomText(
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,
     lineHeight: TextUnit = TextUnit.Unspecified,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
     fontFamily: FontFamily? = null,
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null
 ) {
     Text(
         text = text,
+        textDecoration = textDecoration,
+        textAlign = textAlign,
         modifier = modifier,
         color = color,
+        maxLines = maxLines,
         fontSize = fontSize,
+        overflow = overflow,
         lineHeight = lineHeight,
         fontStyle = fontStyle,
         fontWeight = fontWeight,
@@ -211,7 +245,13 @@ fun BackButton(onBackClick: () -> Unit) {
 }
 
 @Composable
-fun BackButtonWithTitle(title: String, onBackClick: () -> Unit) {
+fun BackButtonWithTitle(
+    title: String,
+    titleModifier: Modifier = Modifier,
+    maxLines: Int = Int.MAX_VALUE,
+    titleOverflow: TextOverflow = TextOverflow.Clip,
+    onBackClick: () -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
@@ -219,7 +259,11 @@ fun BackButtonWithTitle(title: String, onBackClick: () -> Unit) {
     ) {
         BackButton(onBackClick = onBackClick)
         Spacer(modifier = Modifier.width(10.dp))
-        CustomText(text = title, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+        CustomText(
+            modifier = titleModifier,
+            text = title, fontSize = 24.sp, fontWeight = FontWeight.SemiBold, maxLines = maxLines,
+            overflow = titleOverflow,
+        )
     }
     Spacer(modifier = Modifier.height(5.dp))
 }
@@ -234,13 +278,37 @@ fun Loader(size: Dp = 45.dp, color: Color = MaterialTheme.colorScheme.primary) {
 }
 
 @Composable
+fun LoaderRow() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Loader()
+    }
+}
+
+@Composable
 fun LoaderScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Loader(size=60.dp)
+        Loader(size = 60.dp)
+    }
+}
+
+@Composable
+fun ErrorScreen(errorMsg: String) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CustomText(errorMsg, color = Color.Red, fontSize = 24.sp)
     }
 }
 
@@ -257,7 +325,7 @@ fun CustomButton(
         enabled = enabled,
         modifier = modifier,
         colors = colors,
-        shape =  shape,
+        shape = shape,
         onClick = onClickBtn,
         content = content
     )
@@ -284,3 +352,125 @@ fun LoaderButton(
         }
     }
 }
+
+@Composable
+fun <T> SearchableDropdown(
+    items: List<T>,
+    selectedItem: T?,
+    onItemSelected: (T) -> Unit,
+    itemLabel: (T?) -> String,
+    itemContent: @Composable (T) -> Unit = { Text(itemLabel(it)) },
+    onChangeHandler: ((String) -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf(itemLabel(selectedItem)) }
+    val filteredItems by remember(searchQuery, items) {
+        derivedStateOf {
+            items.filter { itemLabel(it).contains(searchQuery, ignoreCase = true) }
+        }
+    }
+
+    val focusManager = LocalFocusManager.current
+
+    // This keeps track of where to anchor the dropdown
+    var textFieldSize by remember { mutableStateOf(IntSize.Zero) }
+    var textFieldPosition by remember { mutableStateOf(Offset.Zero) }
+
+    Box(modifier = modifier.onGloballyPositioned {
+        textFieldSize = it.size
+        textFieldPosition = it.localToWindow(Offset.Zero)
+    }) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = {
+                if (onChangeHandler != null) {
+                    onChangeHandler(it)
+                }
+                searchQuery = it
+                expanded = true
+            },
+            label = { CustomText("Search") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned {
+                    textFieldSize = it.size
+                },
+            trailingIcon = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    modifier = Modifier.clickable {
+                        expanded = !expanded
+                    }
+                )
+            },
+            singleLine = true
+        )
+
+        DropdownContent(
+            expanded = expanded,
+            itemContent = {
+                if (filteredItems.isEmpty()) {
+                    Text("No results", modifier = Modifier.padding(16.dp))
+                } else {
+                    filteredItems.forEach { item ->
+                        DropdownMenuItem(
+                            text = { itemContent(item) },
+                            onClick = {
+                                searchQuery = itemLabel(item)
+                                onItemSelected(item)
+                                expanded = false
+                                focusManager.clearFocus()
+                            }
+                        )
+                    }
+                }
+            },
+            width = textFieldSize.width,
+            offsetY = textFieldSize.height, // Show directly below TextField
+            onDismiss = { expanded = false }
+        )
+    }
+}
+
+@Composable
+fun DropdownContent(
+    expanded: Boolean,
+    itemContent: @Composable ColumnScope.() -> Unit,
+    width: Int,
+    offsetY: Int,
+    onDismiss: () -> Unit
+) {
+    if (expanded) {
+        Popup(
+            alignment = Alignment.TopStart,
+            offset = IntOffset(x = 0, y = offsetY),
+            onDismissRequest = onDismiss,
+            properties = PopupProperties(focusable = false)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                tonalElevation = 4.dp,
+                modifier = Modifier
+                    .width(with(LocalDensity.current) { width.toDp() })
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    itemContent()
+                }
+            }
+        }
+    }
+}
+
+
+//@Preview()
+//@Composable
+//fun PreviewSomeStuff() {
+//
+//}

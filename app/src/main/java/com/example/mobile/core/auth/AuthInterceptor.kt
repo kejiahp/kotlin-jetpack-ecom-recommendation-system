@@ -11,7 +11,7 @@ class AuthInterceptor(private val token:String?) : Interceptor {
         val request = chain.request().newBuilder()
             .apply {
                 if (!token.isNullOrEmpty()) {
-                    addHeader("Authorization", "Bearer $token")
+                    addHeader("Authorization", token)
                 }
             }
             .build()

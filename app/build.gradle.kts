@@ -91,6 +91,8 @@ dependencies {
 
     // Jetpack compose and AndroidX Security library using Security Crypto
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }
 
 // Jetpack compose and Hilt Configurations

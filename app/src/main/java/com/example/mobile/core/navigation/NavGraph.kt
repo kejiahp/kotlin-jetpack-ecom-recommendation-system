@@ -6,11 +6,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.example.mobile.auth.codereset.CodeResetScreen
 import com.example.mobile.auth.codereset.RequestCondeResetScreen
 import com.example.mobile.auth.login.LoginScreen
 import com.example.mobile.auth.signup.SignUpScreen
-import com.example.mobile.product.home.ProductHomeScreen
+import com.example.mobile.product_cart_order.category.CategoryProductsScreen
+import com.example.mobile.product_cart_order.details.ProductDetailsScreen
+import com.example.mobile.product_cart_order.home.ProductHomeScreen
 
 import kotlinx.serialization.Serializable
 
@@ -33,6 +36,12 @@ object NavRoutes {
 
     @Serializable
     object ProductHomeScreen
+
+    @Serializable
+    data class ProductDetails(val productId: String)
+
+    @Serializable
+    data class CategoryProducts(val categoryId: String)
 }
 
 /**
@@ -59,6 +68,14 @@ fun NavGraph(modifier: Modifier, navController: NavHostController) {
         }
         composable<NavRoutes.ProductHomeScreen> {
             ProductHomeScreen(navController)
+        }
+        composable<NavRoutes.ProductDetails> { backStackEntry ->
+            val productDetail: NavRoutes.ProductDetails = backStackEntry.toRoute()
+            ProductDetailsScreen(productId = productDetail.productId, navController = navController)
+        }
+        composable<NavRoutes.CategoryProducts> { backStackEntry ->
+            val categoryProducts: NavRoutes.CategoryProducts = backStackEntry.toRoute()
+            CategoryProductsScreen(categoryId = categoryProducts.categoryId, navController = navController)
         }
     }
 }
