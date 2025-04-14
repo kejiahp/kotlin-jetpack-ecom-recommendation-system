@@ -2,20 +2,15 @@ package com.example.mobile.product_cart_order.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mobile.auth.codereset.RequestCodeResetRequest
 import com.example.mobile.core.DataQueryState
-import com.example.mobile.core.utilites.CoreUtils
 import com.example.mobile.core.utilites.ResourceState
-import com.example.mobile.product_cart_order.ProdCartOrderSharedPreferenceService
+import com.example.mobile.product_cart_order.preference.ProdCartOrderSharedPreferenceService
 import com.example.mobile.product_cart_order.ProductCartOrderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -51,13 +46,6 @@ class ProductHomeViewModel @Inject constructor(
         getAllCategories()
     }
 
-    fun addToRecentlyViewed(productId: String) {
-        val recentViewList = prodCartOrderSharedPreferenceService.getRecentViewFromPreference().toMutableList()
-        if (recentViewList.size < 3) {
-            recentViewList.add(productId)
-            prodCartOrderSharedPreferenceService.saveRecentViewToPreference(recentViewList)
-        }
-    }
 
     fun searchProductByName(name: String) {
         if (name.isNotEmpty() && name.isNotBlank()) {

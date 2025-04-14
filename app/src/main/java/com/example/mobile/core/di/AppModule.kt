@@ -17,7 +17,7 @@ import com.example.mobile.core.CoreConstants
 import com.example.mobile.core.auth.AuthDeletePreferenceOnBadToken
 import com.example.mobile.core.auth.AuthInterceptor
 import com.example.mobile.core.auth.AuthPreferenceService
-import com.example.mobile.product_cart_order.ProdCartOrderSharedPreferenceService
+import com.example.mobile.product_cart_order.preference.ProdCartOrderSharedPreferenceService
 import com.example.mobile.product_cart_order.ProductCartOrderApiService
 import com.example.mobile.product_cart_order.ProductCartOrderDataSource
 import com.example.mobile.product_cart_order.ProductCartOrderDataSourceInterface

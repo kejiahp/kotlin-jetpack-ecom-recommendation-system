@@ -2,12 +2,9 @@ package com.example.mobile.core.auth
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import androidx.security.crypto.MasterKey
 import androidx.security.crypto.EncryptedSharedPreferences

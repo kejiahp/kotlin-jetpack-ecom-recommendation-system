@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,10 +22,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -36,15 +41,17 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,7 +59,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Modifier.Companion
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -69,7 +75,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -78,7 +83,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.mobile.R
+import com.example.mobile.auth.login.LoginData
+import com.example.mobile.core.auth.AuthViewModel
+import com.example.mobile.core.navigation.NavRoutes
 
 @Composable
 fun CustomText(
@@ -116,6 +126,7 @@ fun StyledOutlinedTextField(
     modifier: Modifier = Modifier,
     keyboardOpt: KeyboardOptions = KeyboardOptions.Default,
     value: String,
+    enabled: Boolean = true,
     onChange: (String) -> Unit,
     emptyFieldHandler: () -> Unit,
     imgVec: ImageVector,
@@ -126,6 +137,7 @@ fun StyledOutlinedTextField(
     OutlinedTextField(
         modifier = modifier,
         value = value,
+        enabled = enabled,
         onValueChange = onChange,
         label = label,
         placeholder = placeholder,
@@ -239,7 +251,7 @@ fun BackButton(onBackClick: () -> Unit) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Back",
-            tint = Color.Black
+            tint = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -335,13 +347,14 @@ fun CustomButton(
 fun LoaderButton(
     isLoading: Boolean,
     enabled: Boolean = true,
+    modifier: Modifier = Modifier,
     onClickBtn: () -> Unit,
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
         // disable the button if loading is true
         enabled = enabled && !isLoading,
-        modifier = Modifier.size(width = 200.dp, height = 60.dp),
+        modifier = modifier.size(width = 200.dp, height = 60.dp),
         shape = RoundedCornerShape(5.dp),
         onClick = onClickBtn
     ) {
@@ -468,9 +481,229 @@ fun DropdownContent(
     }
 }
 
+@Composable
+fun IconDropdownMenu(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    authUser: LoginData?,
+    logOutHandler: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
 
-//@Preview()
-//@Composable
-//fun PreviewSomeStuff() {
-//
-//}
+    Box(modifier = modifier) {
+        OutlinedIconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Outlined.Person,
+                contentDescription = "Person Icon",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+
+        DropdownMenu(
+            modifier = Modifier.padding(10.dp),
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (authUser != null) {
+                Column {
+                    CustomText(
+                        authUser.username.uppercase(),
+                        modifier = Modifier.width(200.dp),
+                        maxLines = 1,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    CustomText(
+                        "Gender: ${authUser.gender}",
+                        fontSize = 12.sp,
+                        lineHeight = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    CustomText(
+                        "Location: ${authUser.location}",
+                        fontSize = 12.sp,
+                        lineHeight = 12.sp, fontWeight = FontWeight.Medium
+                    )
+                    CustomText(
+                        "Age: ${authUser.age}",
+                        fontSize = 12.sp,
+                        lineHeight = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        modifier = Modifier.padding(vertical = 5.dp)
+                    )
+                }
+
+                DropdownMenuItem(
+                    text = {
+                        Row {
+                            Icon(
+                                Icons.Default.Home,
+                                contentDescription = "Home",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomText("Home")
+                        }
+                    },
+                    onClick = {
+                        expanded = false
+                        navController.navigate(NavRoutes.ProductHomeScreen)
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Row {
+                            Icon(
+                                Icons.Default.ShoppingCart,
+                                contentDescription = "Cart",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomText("Cart")
+                        }
+                    },
+                    onClick = {
+                        expanded = false
+                        navController.navigate(NavRoutes.CartScreen)
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Row {
+                            Icon(
+                                Icons.Default.Favorite,
+                                contentDescription = "Order",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomText("Order")
+                        }
+                    },
+                    onClick = {
+                        expanded = false
+                        navController.navigate(NavRoutes.OrderScreen)
+                    }
+                )
+                DropdownMenuItem(
+                    text = {
+                        Row {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Log Out",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomText("Log Out")
+                        }
+                    },
+                    onClick = {
+                        expanded = false
+                        // LOG USER OUR, DELETE AUTH USER FROM SHARED PREFERENCE
+                        logOutHandler()
+                    }
+                )
+            } else {
+                DropdownMenuItem(
+                    text = {
+                        Row {
+                            Icon(
+                                Icons.Default.Home,
+                                contentDescription = "Home",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomText("Home")
+                        }
+                    },
+                    onClick = {
+                        expanded = false
+                        navController.navigate(NavRoutes.ProductHomeScreen)
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Row {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = "Login",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomText("Login")
+                        }
+                    },
+                    onClick = {
+                        expanded = false
+                        navController.navigate(NavRoutes.Login)
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Row {
+                            Icon(
+                                Icons.Default.Create,
+                                contentDescription = "Sign Up",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            CustomText("Sign Up")
+                        }
+                    },
+                    onClick = {
+                        expanded = false
+                        navController.navigate(NavRoutes.SignUp)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable()
+fun StickyTopNavbar(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    authViewModel: AuthViewModel = hiltViewModel(),
+    detailSection: (@Composable ColumnScope.() -> Unit)?
+) {
+    val authUser by authViewModel.authUser.collectAsState()
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(0.7f)) {
+            detailSection?.let { it() }
+        }
+
+        IconDropdownMenu(
+            modifier = Modifier.weight(0.1f),
+            navController = navController,
+            authUser = authUser,
+            logOutHandler = {
+                authViewModel.deleteAuthUser()
+
+                navController.navigate(NavRoutes.ProductHomeScreen)
+            }
+        )
+    }
+}

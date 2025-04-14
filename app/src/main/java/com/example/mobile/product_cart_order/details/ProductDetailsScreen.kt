@@ -1,5 +1,6 @@
 package com.example.mobile.product_cart_order.details
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,12 +35,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavController
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -58,23 +63,45 @@ import com.example.mobile.core.ErrorScreen
 import com.example.mobile.core.LoaderButton
 import com.example.mobile.core.LoaderRow
 import com.example.mobile.core.LoaderScreen
+import com.example.mobile.core.StickyTopNavbar
 import com.example.mobile.core.auth.AuthViewModel
 import com.example.mobile.core.navigation.NavRoutes
 import com.example.mobile.core.utilites.CoreUtils
 import com.example.mobile.product_cart_order.components.ProductListing
 import com.example.mobile.product_cart_order.home.ProductHomeViewModel
+import com.example.mobile.product_cart_order.preference.ProdCartOrderSharedPreferenceViewModel
 
 @Composable
 fun ProductDetailsScreen(
     productId: String,
     navController: NavController = rememberNavController(),
     productDetailsViewModel: ProductDetailsViewModel = hiltViewModel(),
-    productHomeViewModel: ProductHomeViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    prodCartOrderSharedPreferenceViewModel: ProdCartOrderSharedPreferenceViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
+    val toastCtx = LocalContext.current
+    var quantity by remember { mutableIntStateOf(1) }
     val productDetailsQueryState by productDetailsViewModel.productDetailsQueryState.collectAsState()
     val relatedProductQueryState by productDetailsViewModel.relatedProductQueryState.collectAsState()
+    val addToCartQueryState by productDetailsViewModel.addToCartQueryState.collectAsState()
+    val authUser by authViewModel.authUser.collectAsState()
+
+    fun onAddToCartClickHandler(prodId: String, qty: Int) {
+        if(authUser != null) {
+            productDetailsViewModel.addToCartHandler(
+                prodId,
+                qty,
+                "ADD"
+            )
+        }else {
+            Toast.makeText(toastCtx, "Login to add items to cart", Toast.LENGTH_LONG)
+                .show()
+            navController.navigate(NavRoutes.Login)
+        }
+    }
+
+
 
     LaunchedEffect(productId) {
         if (productId.isEmpty()) {
@@ -85,6 +112,17 @@ fun ProductDetailsScreen(
         }
     }
 
+    LaunchedEffect(addToCartQueryState) {
+        if (addToCartQueryState.errorMsg.isNotEmpty()) {
+            Toast.makeText(
+                toastCtx, addToCartQueryState.errorMsg, Toast.LENGTH_LONG
+            ).show()
+        }
+        if (addToCartQueryState.data != null) {
+            Toast.makeText(toastCtx, addToCartQueryState.data!!.message, Toast.LENGTH_LONG)
+                .show()
+        }
+    }
 
     Surface(
         modifier = Modifier
@@ -103,12 +141,17 @@ fun ProductDetailsScreen(
                             .padding(10.dp)
                             .fillMaxSize()
                     ) {
-                        BackButtonWithTitle(
-                            title = productData.data.productName,
-                            titleModifier = Modifier.fillMaxWidth(),
-                            maxLines = 1,
-                            titleOverflow = TextOverflow.Ellipsis
-                        ) { navController.popBackStack() }
+                        StickyTopNavbar(
+                            navController = navController,
+                        ) {
+                            BackButtonWithTitle(
+                                title = productData.data.productName,
+                                titleModifier = Modifier.fillMaxWidth(),
+                                maxLines = 1,
+                                titleOverflow = TextOverflow.Ellipsis
+                            ) { navController.popBackStack() }
+                        }
+
 
                         Column(
                             modifier = Modifier
@@ -221,7 +264,7 @@ fun ProductDetailsScreen(
 
                             if (productData.data.productRatings.isNotEmpty()) {
                                 productData.data.productRatings.forEach { rating ->
-                                    Column (modifier = Modifier.padding(vertical = 5.dp)){
+                                    Column(modifier = Modifier.padding(vertical = 5.dp)) {
                                         CustomText(
                                             "Name: ${rating.userId.username} | Age: ${rating.userId.age} | Location: ${rating.userId.location}",
                                             fontSize = 14.sp
@@ -259,7 +302,7 @@ fun ProductDetailsScreen(
                                             title = "Related Products",
                                             products = relatedProd.data,
                                             onProductClick = {
-                                                productHomeViewModel.addToRecentlyViewed(it.id)
+                                                prodCartOrderSharedPreferenceViewModel.addToRecentlyViewed(it.id)
 
                                                 navController.navigate(
                                                     NavRoutes.ProductDetails(
@@ -275,11 +318,17 @@ fun ProductDetailsScreen(
 
                         // Sticky footer
                         BottomStickyButtons(
-                            quantity = "2",
+                            quantity = quantity.toString(),
                             isLoading = false,
-                            onIncreaseHandler = {},
-                            onDecreaseHandler = {},
-                            onAddToCart = { }
+                            onIncreaseHandler = {
+                                if (quantity < 10) quantity = quantity + 1
+                            },
+                            onDecreaseHandler = {
+                                if (quantity > 1) quantity = quantity - 1
+                            },
+                            onAddToCart = {
+                                onAddToCartClickHandler(productData.data.id, quantity)
+                            }
                         )
                     }
                 }
@@ -338,8 +387,17 @@ fun BottomStickyButtons(
 }
 
 
-@Preview(name = "Product details preview", showBackground = true)
-@Composable
-fun ProductDetailsPreview() {
 
-}
+
+//@Preview(name = "Product details preview", showBackground = true)
+//@Composable
+//fun ProductDetailsPreview() {
+//    OutlinedIconButton (onClick = {}) {
+//        Icon(
+//            Icons.Outlined.Person,
+//            contentDescription = "Person Icon",
+//            tint = MaterialTheme.colorScheme.primary,
+//            modifier = Modifier.size(16.dp)
+//        )
+//    }
+//}

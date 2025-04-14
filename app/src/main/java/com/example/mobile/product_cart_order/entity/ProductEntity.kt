@@ -1,7 +1,6 @@
 package com.example.mobile.product_cart_order.entity
 
 import com.google.gson.annotations.SerializedName
-import kotlinx.serialization.Serializable
 
 enum class ProductDiscountType{
     FIXED,
@@ -38,4 +37,8 @@ data class ProductListingDetailsData(
     val sellingPrice: String,
     @SerializedName("avg_rating")
     val avgRating: Float,
+    @SerializedName("is_rated")
+    val isRated: Boolean,
+    @SerializedName("rating_given")
+    val ratingGiven: Float
 )

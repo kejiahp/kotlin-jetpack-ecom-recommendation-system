@@ -3,13 +3,19 @@ package com.example.mobile.auth.login
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -77,7 +83,7 @@ fun LoginScreen(
                 authViewModel.updateAuthUser(it.data)
 
                 // navigate to product listing screen
-//                navController.navigate()
+                navController.navigate(NavRoutes.ProductHomeScreen)
             }
         }
     }
@@ -90,7 +96,21 @@ fun LoginScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                CustomText(text = "Login", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    CustomText(text = "Login", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+
+                    IconButton(onClick = { navController.navigate(NavRoutes.ProductHomeScreen) }) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(5.dp))
                 CustomText(
                     text = "Enter your username and code, sent to your email address to continue",

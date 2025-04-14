@@ -18,10 +18,10 @@ data class PublicUserData(
     val updatedAt: String
 )
 
-data class ProductRatingData(
+data class ProductRatingData<T>(
     val id: String,
     @SerializedName("user_id")
-    val userId: PublicUserData,
+    val userId: T,
     @SerializedName("product_id")
     val productId: String,
     val rating: Int,
@@ -62,7 +62,7 @@ data class ProductDetailsData(
     @SerializedName("avg_rating")
     val avgRating: Float,
     @SerializedName("product_ratings")
-    val productRatings: List<ProductRatingData>
+    val productRatings: List<ProductRatingData<PublicUserData>>
 )
 
 typealias ProductDetailsResponse = ApiResponse<ProductDetailsData>
