@@ -40,6 +40,7 @@ class ProductHomeViewModel @Inject constructor(
     val productSearchResults = _productSearchResults.asStateFlow()
 
     init {
+//        prodCartOrderSharedPreferenceService.clearRecentViewPreference()
         val recentViewList = prodCartOrderSharedPreferenceService.getRecentViewFromPreference()
 
         getProductListing(if (recentViewList.isNotEmpty()) recentViewList.joinToString(separator = ",") else "")

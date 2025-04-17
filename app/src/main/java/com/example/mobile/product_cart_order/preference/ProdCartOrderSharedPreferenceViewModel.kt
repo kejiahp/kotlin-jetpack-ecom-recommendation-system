@@ -8,7 +8,7 @@ import javax.inject.Inject
 class ProdCartOrderSharedPreferenceViewModel @Inject constructor(private val prodCartOrderSharedPreferenceService: ProdCartOrderSharedPreferenceService) :
     ViewModel() {
     companion object {
-        const val TAG = "ProdCartOrderSharedPreferenceViewModel"
+        const val TAG = "ProdCartOrdSharPrefVM"
     }
 
 

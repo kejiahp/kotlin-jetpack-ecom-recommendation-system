@@ -3,7 +3,8 @@ package com.example.mobile.core
 object CoreConstants {
     //    const val BASE_URL = "https://api.nationalize.io/"
     // If you’re testing on an Android Emulator, 127.0.0.1 refers to the emulator itself, not your host machine. You should replace 127.0.0.1 with 10.0.2.2, which maps to your actual local server.
-    const val BASE_URL = "http://10.0.2.2:8000"
+//    const val BASE_URL = "http://10.0.2.2:8000"
+    const val BASE_URL = "https://fastapi-ecom-recommendation-syst-production.up.railway.app"
 
     val genderList: List<String> = listOf("male", "female")
 
