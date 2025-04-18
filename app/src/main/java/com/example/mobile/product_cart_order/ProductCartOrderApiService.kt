@@ -59,7 +59,7 @@ interface ProductCartOrderApiService {
     @DELETE("/cart/empty-cart")
     fun emptyCart(): Call<CartResponse>
 
-    @POST("/order/checkout/")
+    @POST("/order/checkout")
     fun checkout(@Query("receipt_email") receiptEmail: String?): Call<CheckoutResponse>
 
     @GET("/order/get-all-users-orders")
