@@ -35,6 +35,7 @@ import com.example.mobile.core.BackButtonWithTitle
 import com.example.mobile.core.LoaderButton
 import com.example.mobile.core.PasswordTextField
 import com.example.mobile.core.auth.AuthViewModel
+import com.example.mobile.core.auth.RedirectToHomeScreen
 import com.example.mobile.core.navigation.NavRoutes
 
 @Composable
@@ -48,95 +49,100 @@ fun CodeResetScreen(
     val codeResetFormState by codeResetViewModel.codeResetFormState.collectAsState()
     val codeResetQueryState by codeResetViewModel.codeResetQueryState.collectAsState()
 
-    LaunchedEffect(codeResetQueryState) {
-        // Show error message on code reset fail
-        if (codeResetQueryState.errorMsg.isNotEmpty()) {
-            Toast.makeText(
-                toastCtx, codeResetQueryState.errorMsg, Toast.LENGTH_LONG
-            ).show()
+    RedirectToHomeScreen(navController) {
+        LaunchedEffect(codeResetQueryState) {
+            // Show error message on code reset fail
+            if (codeResetQueryState.errorMsg.isNotEmpty()) {
+                Toast.makeText(
+                    toastCtx, codeResetQueryState.errorMsg, Toast.LENGTH_LONG
+                ).show()
+            }
+            // show message on successful code reset
+            if (codeResetQueryState.data != null) {
+                Toast.makeText(toastCtx, codeResetQueryState.data!!.message, Toast.LENGTH_LONG)
+                    .show()
+
+                //sign the current active user out
+                authViewModel.deleteAuthUser()
+
+                // navigate to the login screen
+                navController.navigate(NavRoutes.Login)
+            }
         }
-        // show message on successful code reset
-        if (codeResetQueryState.data != null) {
-            Toast.makeText(toastCtx, codeResetQueryState.data!!.message, Toast.LENGTH_LONG)
-                .show()
 
-            //sign the current active user out
-            authViewModel.deleteAuthUser()
-
-            // navigate to the login screen
-            navController.navigate(NavRoutes.Login)
-        }
-    }
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column(
+        Surface(
             modifier = Modifier
-                .verticalScroll(scrollState)
-                .padding(10.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                BackButtonWithTitle("Reset Code", onBackClick = { navController.popBackStack() })
-
-                CustomText(
-                    text = "Enter the reset token sent to your email address, your old code and your new code",
-                    fontSize = 14.sp
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                StyledOutlinedTextField(modifier = Modifier.fillMaxWidth(),
-                    textFieldError = codeResetFormState.resetTokenError,
-                    value = codeResetFormState.resetToken,
-                    imgVec = ImageVector.vectorResource(R.drawable.key_icon),
-                    onChange = codeResetViewModel::onCodeResetTokenChangeHandler,
-                    label = { CustomText("Reset Token") },
-                    placeholder = { CustomText("Enter your Reset Token") },
-                    emptyFieldHandler = {
-                        codeResetViewModel.onCodeResetTokenChangeHandler("")
-                    })
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                PasswordTextField(
-                    textFieldError = codeResetFormState.oldCodeError,
-                    labelText = "Old Code",
-                    placeholderText = "Enter your Old Code",
-                    password = codeResetFormState.oldCode,
-                    onChangePassword = codeResetViewModel::onCodeResetOldCodeChangeHandler
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                PasswordTextField(
-                    labelText = "New Code",
-                    placeholderText = "Enter your New Code",
-                    textFieldError = codeResetFormState.newCodeError,
-                    password = codeResetFormState.newCode,
-                    onChangePassword = codeResetViewModel::onCodeResetNewCodeChangeHandler
-                )
-            }
-
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .verticalScroll(scrollState)
+                    .padding(10.dp)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                if (codeResetQueryState.errorMsg.isNotEmpty()) {
-                    CustomText(codeResetQueryState.errorMsg, color = Color.Red)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    BackButtonWithTitle(
+                        "Reset Code",
+                        onBackClick = { navController.popBackStack() })
+
+                    CustomText(
+                        text = "Enter the reset token sent to your email address, your old code and your new code",
+                        fontSize = 14.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    StyledOutlinedTextField(modifier = Modifier.fillMaxWidth(),
+                        textFieldError = codeResetFormState.resetTokenError,
+                        value = codeResetFormState.resetToken,
+                        imgVec = ImageVector.vectorResource(R.drawable.key_icon),
+                        onChange = codeResetViewModel::onCodeResetTokenChangeHandler,
+                        label = { CustomText("Reset Token") },
+                        placeholder = { CustomText("Enter your Reset Token") },
+                        emptyFieldHandler = {
+                            codeResetViewModel.onCodeResetTokenChangeHandler("")
+                        })
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    PasswordTextField(
+                        textFieldError = codeResetFormState.oldCodeError,
+                        labelText = "Old Code",
+                        placeholderText = "Enter your Old Code",
+                        password = codeResetFormState.oldCode,
+                        onChangePassword = codeResetViewModel::onCodeResetOldCodeChangeHandler
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    PasswordTextField(
+                        labelText = "New Code",
+                        placeholderText = "Enter your New Code",
+                        textFieldError = codeResetFormState.newCodeError,
+                        password = codeResetFormState.newCode,
+                        onChangePassword = codeResetViewModel::onCodeResetNewCodeChangeHandler
+                    )
                 }
 
-                LoaderButton(
-                    isLoading = codeResetQueryState.isLoading,
-                    onClickBtn = codeResetViewModel::onCodeResetSubmitHandler
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CustomText("Change code", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    if (codeResetQueryState.errorMsg.isNotEmpty()) {
+                        CustomText(codeResetQueryState.errorMsg, color = Color.Red)
+                    }
+
+                    LoaderButton(
+                        isLoading = codeResetQueryState.isLoading,
+                        onClickBtn = codeResetViewModel::onCodeResetSubmitHandler
+                    ) {
+                        CustomText("Change code", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
             }
         }
+
     }
 }
 

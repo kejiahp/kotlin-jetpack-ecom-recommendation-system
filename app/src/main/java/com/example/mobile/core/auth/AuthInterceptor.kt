@@ -6,13 +6,16 @@ import okhttp3.Response
 /**
  * Add the `Authorization` header to each and every requests
  * */
-class AuthInterceptor(private val token:String?) : Interceptor {
+class AuthInterceptor(private val tokenProvider: () -> String?) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request().newBuilder()
             .apply {
-                if (!token.isNullOrEmpty()) {
-                    addHeader("Authorization", token)
+                tokenProvider()?.let {
+                    addHeader("Authorization", it)
                 }
+//                if (!token.isNullOrEmpty()) {
+//                    addHeader("Authorization", token())
+//                }
             }
             .build()
         return chain.proceed(request)

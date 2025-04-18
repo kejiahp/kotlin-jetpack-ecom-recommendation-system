@@ -1,6 +1,7 @@
 package com.example.mobile.core.di
 
 import android.content.Context
+import android.util.Log
 import com.example.mobile.auth.codereset.CodeResetApiService
 import com.example.mobile.auth.codereset.CodeResetDataSource
 import com.example.mobile.auth.codereset.CodeResetDataSourceInterface
@@ -42,14 +43,17 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
+    companion object {
+        private const val TAG = "AppModule"
+    }
     /**
      * AuthPreferenceService dependency definition
      *
      *
      * This will pass the application context to the authPreference service, without leaking memory
      * */
+//    @Singleton
     @Provides
-    @Singleton
     fun providesAuthPreferenceService(@ApplicationContext context: Context): AuthPreferenceService {
         return AuthPreferenceService(context = context)
     }
@@ -69,8 +73,8 @@ class AppModule {
      * The `@Provides` annotation creates provider method binding.
      * The `@Singleton` annotation ensures the dependency is only instantiated once
      * */
+//    @Singleton
     @Provides
-    @Singleton
     fun providesRetrofit(authPreferenceService: AuthPreferenceService): Retrofit {
         // To see api calls and responses within LogCat
         // the `apply` scope function allows the configuration of an object within a block and return the object itself
@@ -81,8 +85,9 @@ class AppModule {
         // Defining an httpclient to be used together with retrofit
         val httpClient = OkHttpClient().newBuilder().apply {
             addInterceptor(httpLoggingInterceptor)
+//            Log.d(TAG, authPreferenceService.getLoginResData().toString())
             // add `Authorization` header
-            addInterceptor(AuthInterceptor(authPreferenceService.authUser.value?.tkn))
+            addInterceptor(AuthInterceptor { authPreferenceService.getLoginResData()?.tkn })
             // if status code 403, delete auth token
             addInterceptor(AuthDeletePreferenceOnBadToken(authPreferenceService::removeLoginResData))
         }
@@ -98,8 +103,8 @@ class AppModule {
      *
      * This allows the use of `SignUpApiService` through dependency injection
      * */
+//    @Singleton
     @Provides
-    @Singleton
     fun providesSignUpApiService(retrofit: Retrofit): SignUpApiService {
         return retrofit.create(SignUpApiService::class.java)
     }
@@ -130,8 +135,8 @@ class AppModule {
      *
      * This allows the use of `LoginApiService` through dependency injection
      * */
+//    @Singleton
     @Provides
-    @Singleton
     fun providesLoginApiService(retrofit: Retrofit): LoginApiService {
         return retrofit.create(LoginApiService::class.java)
     }
@@ -159,8 +164,8 @@ class AppModule {
     /**
      * CodeResetApiService dependency definition
      * */
+//    @Singleton
     @Provides
-    @Singleton
     fun providesCodeResetApiService(retrofit: Retrofit): CodeResetApiService {
         return retrofit.create(CodeResetApiService::class.java)
     }
@@ -186,8 +191,8 @@ class AppModule {
     /**
      * ProductCartOrderApiService dependency definition
      * */
+//    @Singleton
     @Provides
-    @Singleton
     fun providesProductCartOrderApiService(retrofit: Retrofit): ProductCartOrderApiService {
         return retrofit.create(ProductCartOrderApiService::class.java)
     }

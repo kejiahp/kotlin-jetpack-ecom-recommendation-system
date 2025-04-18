@@ -2,20 +2,15 @@ package com.example.mobile.core.navigation
 
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.mobile.auth.codereset.CodeResetScreen
 import com.example.mobile.auth.codereset.RequestCondeResetScreen
-import androidx.compose.runtime.getValue
 import com.example.mobile.auth.login.LoginScreen
 import com.example.mobile.auth.signup.SignUpScreen
-import com.example.mobile.core.auth.AuthViewModel
-import com.example.mobile.core.utilites.CoreUtils
 import com.example.mobile.product_cart_order.cart.CartScreen
 import com.example.mobile.product_cart_order.category.CategoryProductsScreen
 import com.example.mobile.product_cart_order.details.ProductDetailsScreen
@@ -64,44 +59,23 @@ object NavRoutes {
 fun NavGraph(
     modifier: Modifier,
     navController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    val authUser by authViewModel.authUser.collectAsState()
-
-    CoreUtils.printDebugger("NavGraph", authUser)
-
     NavHost(
         modifier = modifier,
         navController = navController,
         startDestination = NavRoutes.ProductHomeScreen
     ) {
         composable<NavRoutes.SignUp> {
-            if (authUser == null) {
-                SignUpScreen(navController)
-            } else {
-                ProductHomeScreen(navController)
-            }
+            SignUpScreen(navController)
         }
         composable<NavRoutes.Login> {
-            if (authUser == null) {
-                LoginScreen(navController)
-            } else {
-                ProductHomeScreen(navController)
-            }
+            LoginScreen(navController)
         }
         composable<NavRoutes.CodeResetScreen> {
-            if (authUser == null) {
-                CodeResetScreen(navController)
-            } else {
-                ProductHomeScreen(navController)
-            }
+            CodeResetScreen(navController)
         }
         composable<NavRoutes.RequestCondeResetScreen> {
-            if (authUser == null) {
-                RequestCondeResetScreen(navController)
-            } else {
-                ProductHomeScreen(navController)
-            }
+            RequestCondeResetScreen(navController)
         }
         composable<NavRoutes.ProductHomeScreen> {
             ProductHomeScreen(navController)
@@ -117,22 +91,11 @@ fun NavGraph(
                 navController = navController
             )
         }
-
         composable<NavRoutes.CartScreen> {
-            if (authUser != null) {
-                CartScreen(navController = navController)
-            } else {
-                LoginScreen(navController)
-            }
+            CartScreen(navController = navController)
         }
-
         composable<NavRoutes.OrderScreen> {
-            if (authUser != null) {
-                OrderScreen(navController = navController)
-            } else {
-                LoginScreen(navController)
-            }
+            OrderScreen(navController = navController)
         }
-
     }
 }

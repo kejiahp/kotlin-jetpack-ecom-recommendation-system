@@ -106,7 +106,7 @@ class AuthPreferenceService @Inject constructor(
     /**
      * Deserialize login data as a `LoginData` data class
      * */
-    private fun getLoginResData(): LoginData? {
+    fun getLoginResData(): LoginData? {
         val loginData = sharedPreferences.getString(AUTH_KEY, null)
         if (loginData != null) {
             return Gson().fromJson(loginData, LoginData::class.java)

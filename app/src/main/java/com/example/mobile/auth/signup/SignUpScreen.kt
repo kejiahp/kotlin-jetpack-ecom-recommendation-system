@@ -47,6 +47,7 @@ import com.example.mobile.core.CustomButton
 import com.example.mobile.core.CustomExposedDropdownMenu
 import com.example.mobile.core.LoaderButton
 import com.example.mobile.core.StyledOutlinedTextField
+import com.example.mobile.core.auth.RedirectToHomeScreen
 import com.example.mobile.core.navigation.NavRoutes
 
 
@@ -68,185 +69,200 @@ fun SignUpScreen(
     val errorMsg by signUpViewModel.errorMsg.collectAsState()
     val isLoading by signUpViewModel.isLoading.collectAsState()
 
-    formState.gender.let {
-        LaunchedEffect(it) {
-            if (it.isEmpty()) {
-                signUpViewModel.onGenderChangeHandler(genderList[0])
+    RedirectToHomeScreen(navController) {
+        formState.gender.let {
+            LaunchedEffect(it) {
+                if (it.isEmpty()) {
+                    signUpViewModel.onGenderChangeHandler(genderList[0])
+                }
             }
         }
-    }
-    formState.location.let {
-        LaunchedEffect(it) {
-            if (it.isEmpty()) {
-                signUpViewModel.onLocationChangeHandler(countryList[0])
+        formState.location.let {
+            LaunchedEffect(it) {
+                if (it.isEmpty()) {
+                    signUpViewModel.onLocationChangeHandler(countryList[0])
+                }
             }
         }
-    }
 
-    // Show error message on signup fail
-    LaunchedEffect(errorMsg) {
-        if (errorMsg.isNotEmpty()) {
-            Toast.makeText(
-                toastCtx,
-                errorMsg,
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    // Show message on signup success
-    resData?.let {
-        LaunchedEffect(it) {
-            if (it.message.isNotEmpty()) {
+        // Show error message on signup fail
+        LaunchedEffect(errorMsg) {
+            if (errorMsg.isNotEmpty()) {
                 Toast.makeText(
                     toastCtx,
-                    it.message,
+                    errorMsg,
                     Toast.LENGTH_LONG
                 ).show()
             }
-            if(it.success) {
-                // navigate to the login screen if authentication is successful
-                navController.navigate(NavRoutes.Login)
+        }
+
+        // Show message on signup success
+        resData?.let {
+            LaunchedEffect(it) {
+                if (it.message.isNotEmpty()) {
+                    Toast.makeText(
+                        toastCtx,
+                        it.message,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                if (it.success) {
+                    // navigate to the login screen if authentication is successful
+                    navController.navigate(NavRoutes.Login)
+                }
             }
         }
-    }
 
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column(
+        Surface(
             modifier = Modifier
-                .verticalScroll(scrollState)
-                .padding(10.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
+                .fillMaxSize()
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    CustomText(text = "Sign Up", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
-
-                    IconButton(onClick = { navController.navigate(NavRoutes.ProductHomeScreen) }) {
-                        Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = "Home",
-                            tint = MaterialTheme.colorScheme.primary
+            Column(
+                modifier = Modifier
+                    .verticalScroll(scrollState)
+                    .padding(10.dp)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        CustomText(
+                            text = "Sign Up",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
+
+                        IconButton(onClick = { navController.navigate(NavRoutes.ProductHomeScreen) }) {
+                            Icon(
+                                imageVector = Icons.Default.Home,
+                                contentDescription = "Home",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(5.dp))
+                    CustomText(
+                        text = "Create an account",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Spacer(modifier = Modifier.height(5.dp))
+                    CustomText(
+                        text = "An email containing your authentication details will be sent to you. Emails provided are not stored in the system, they are only used to send your authentication details.",
+                        fontSize = 12.sp,
+                        lineHeight = 15.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    // Username Input Field
+                    StyledOutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = formState.username,
+                        textFieldError = formState.usernameError,
+                        imgVec = Icons.Default.Person,
+                        onChange = signUpViewModel::onUsernameChangeHandler,
+                        label = { CustomText("Username") },
+                        placeholder = { CustomText("Enter your Username") },
+                        emptyFieldHandler = {
+                            signUpViewModel.onUsernameChangeHandler("")
+                        })
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Email Input Field
+                    StyledOutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = formState.email,
+                        textFieldError = formState.emailError,
+                        imgVec = Icons.Default.Email,
+                        keyboardOpt = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        onChange = signUpViewModel::onEmailChangeHandler,
+                        label = { CustomText("Email") },
+                        placeholder = { CustomText("Enter your Email") },
+                        emptyFieldHandler = {
+                            signUpViewModel.onEmailChangeHandler("")
+                        })
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Age Input Field
+                    StyledOutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = formState.age.toString(),
+                        textFieldError = formState.ageError,
+                        imgVec = Icons.Outlined.Person,
+                        keyboardOpt = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        onChange = { it ->
+                            if (it.isNotEmpty() && it.all { it.isDigit() }) {
+                                signUpViewModel.onAgeChangeHandler(it.toInt())
+                            }
+                        },
+                        label = { CustomText("Age") },
+                        placeholder = { CustomText("Enter your Age") },
+                        emptyFieldHandler = {
+                            signUpViewModel.onAgeChangeHandler(18)
+                        })
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Location Input Dropdown
+                    CustomExposedDropdownMenu(
+                        selectedText = formState.location,
+                        textFieldError = formState.locationError,
+                        onSelectedText = signUpViewModel::onLocationChangeHandler,
+                        expanded = locationExpanded,
+                        onExpandedChange = { locationExpanded = it },
+                        options = countryList,
+                        label = { CustomText("Location") }
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Gender Input Dropdown
+                    CustomExposedDropdownMenu(
+                        selectedText = formState.gender,
+                        textFieldError = formState.genderError,
+                        onSelectedText = signUpViewModel::onGenderChangeHandler,
+                        expanded = genderExpanded,
+                        onExpandedChange = { genderExpanded = it },
+                        options = genderList,
+                        label = { CustomText("Gender") }
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    CustomText(
+                        "To ensure full anonymity, use the button below to fill the form with random user data.",
+                        fontSize = 12.sp, lineHeight = 15.sp
+                    )
+
+                    CustomButton(onClickBtn = signUpViewModel::randomUserData) {
+                        CustomText("Use Random")
                     }
                 }
-                
-                Spacer(modifier = Modifier.height(5.dp))
-                CustomText(text = "Create an account", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-
-                Spacer(modifier = Modifier.height(5.dp))
-                CustomText(text = "An email containing your authentication details will be sent to you. Emails provided are not stored in the system, they are only used to send your authentication details.", fontSize = 12.sp, lineHeight = 15.sp)
-
-                Spacer(modifier = Modifier.height(10.dp))
-                // Username Input Field
-                StyledOutlinedTextField(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    value = formState.username,
-                    textFieldError = formState.usernameError,
-                    imgVec = Icons.Default.Person,
-                    onChange = signUpViewModel::onUsernameChangeHandler,
-                    label = { CustomText("Username") },
-                    placeholder = { CustomText("Enter your Username") },
-                    emptyFieldHandler = {
-                        signUpViewModel.onUsernameChangeHandler("")
-                    })
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Email Input Field
-                StyledOutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = formState.email,
-                    textFieldError = formState.emailError,
-                    imgVec = Icons.Default.Email,
-                    keyboardOpt = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    onChange = signUpViewModel::onEmailChangeHandler,
-                    label = { CustomText("Email") },
-                    placeholder = { CustomText("Enter your Email") },
-                    emptyFieldHandler = {
-                        signUpViewModel.onEmailChangeHandler("")
-                    })
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Age Input Field
-                StyledOutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = formState.age.toString(),
-                    textFieldError = formState.ageError,
-                    imgVec = Icons.Outlined.Person,
-                    keyboardOpt = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    onChange = { it ->
-                        if (it.isNotEmpty() && it.all { it.isDigit() }) {
-                            signUpViewModel.onAgeChangeHandler(it.toInt())
-                        }
-                    },
-                    label = { CustomText("Age") },
-                    placeholder = { CustomText("Enter your Age") },
-                    emptyFieldHandler = {
-                        signUpViewModel.onAgeChangeHandler(18)
-                    })
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Location Input Dropdown
-                CustomExposedDropdownMenu(
-                    selectedText = formState.location,
-                    textFieldError = formState.locationError,
-                    onSelectedText = signUpViewModel::onLocationChangeHandler,
-                    expanded = locationExpanded,
-                    onExpandedChange = { locationExpanded = it },
-                    options = countryList,
-                    label = { CustomText("Location") }
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Gender Input Dropdown
-                CustomExposedDropdownMenu(
-                    selectedText = formState.gender,
-                    textFieldError = formState.genderError,
-                    onSelectedText = signUpViewModel::onGenderChangeHandler,
-                    expanded = genderExpanded,
-                    onExpandedChange = { genderExpanded = it },
-                    options = genderList,
-                    label = { CustomText("Gender") }
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                CustomText(
-                    "To ensure full anonymity, use the button below to fill the form with random user data.",
-                    fontSize = 12.sp, lineHeight = 15.sp
-                )
-
-                CustomButton(onClickBtn = signUpViewModel::randomUserData) {
-                    CustomText("Use Random")
-                }
-            }
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                if (errorMsg.isNotEmpty()) {
-                    CustomText(errorMsg, color = Color.Red)
-                }
-                LoaderButton(
-                    isLoading = isLoading,
-                    onClickBtn = { signUpViewModel.onSubmitHandler() }
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CustomText("Sign Up", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    if (errorMsg.isNotEmpty()) {
+                        CustomText(errorMsg, color = Color.Red)
+                    }
+                    LoaderButton(
+                        isLoading = isLoading,
+                        onClickBtn = { signUpViewModel.onSubmitHandler() }
+                    ) {
+                        CustomText("Sign Up", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+                    TextButton(onClick = { navController.navigate(NavRoutes.Login) }) { CustomText("Already have an account?") }
                 }
-                TextButton(onClick = { navController.navigate(NavRoutes.Login) }) { CustomText("Already have an account?") }
             }
         }
+
     }
 }

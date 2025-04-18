@@ -47,6 +47,7 @@ import com.example.mobile.core.CustomText
 import com.example.mobile.core.ErrorScreen
 import com.example.mobile.core.LoaderScreen
 import com.example.mobile.core.StickyTopNavbar
+import com.example.mobile.core.auth.SecureScreen
 import com.example.mobile.core.navigation.NavRoutes
 import com.example.mobile.core.utilites.CoreUtils
 import com.example.mobile.product_cart_order.entity.CartItemPopulatedData
@@ -63,120 +64,125 @@ fun OrderScreen(
     val usersOrdersQueryState by ordersViewModel.usersOrdersQueryState.collectAsState()
     val rateProductQueryState by ordersViewModel.rateProductQueryState.collectAsState()
 
+    SecureScreen(navController = navController) {
+        LaunchedEffect(rateProductQueryState) {
+            CoreUtils.printDebugger("OrderScreen", rateProductQueryState)
+            if (rateProductQueryState.errorMsg.isNotEmpty()) {
+                Toast.makeText(
+                    toastCtx, rateProductQueryState.errorMsg, Toast.LENGTH_LONG
+                ).show()
+            }
+            if (rateProductQueryState.data != null) {
+                Toast.makeText(
+                    toastCtx, rateProductQueryState.data!!.message, Toast.LENGTH_LONG
+                ).show()
 
-    LaunchedEffect(rateProductQueryState) {
-        CoreUtils.printDebugger("OrderScreen", rateProductQueryState)
-        if (rateProductQueryState.errorMsg.isNotEmpty()) {
-            Toast.makeText(
-                toastCtx, rateProductQueryState.errorMsg, Toast.LENGTH_LONG
-            ).show()
+                ordersViewModel.getAllUserOrder()
+            }
         }
-        if (rateProductQueryState.data != null) {
-            Toast.makeText(
-                toastCtx, rateProductQueryState.data!!.message, Toast.LENGTH_LONG
-            ).show()
 
-            ordersViewModel.getAllUserOrder()
-        }
-    }
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column(
+        Surface(
             modifier = Modifier
-                .padding(10.dp)
                 .fillMaxSize()
         ) {
-            StickyTopNavbar(
-                navController = navController,
-            ) {
-                BackButtonWithTitle(
-                    title = "Orders",
-                    titleModifier = Modifier.fillMaxWidth(),
-                    maxLines = 1,
-                    titleOverflow = TextOverflow.Ellipsis
-                ) { navController.navigate(NavRoutes.ProductHomeScreen) }
-            }
-
-
             Column(
                 modifier = Modifier
-                    .verticalScroll(scrollState)
-                    .weight(1f),
+                    .padding(10.dp)
+                    .fillMaxSize()
             ) {
+                StickyTopNavbar(
+                    navController = navController,
+                ) {
+                    BackButtonWithTitle(
+                        title = "Orders",
+                        titleModifier = Modifier.fillMaxWidth(),
+                        maxLines = 1,
+                        titleOverflow = TextOverflow.Ellipsis
+                    ) { navController.navigate(NavRoutes.ProductHomeScreen) }
+                }
 
-                when {
 
-                    usersOrdersQueryState.isLoading -> LoaderScreen()
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(scrollState)
+                        .weight(1f),
+                ) {
 
-                    usersOrdersQueryState.errorMsg.isNotEmpty() -> ErrorScreen(usersOrdersQueryState.errorMsg)
+                    when {
 
-                    usersOrdersQueryState.data != null -> {
-                        usersOrdersQueryState.data?.let { orderData ->
-                            if (orderData.data.isNotEmpty()) {
-                                orderData.data.forEach { order ->
+                        usersOrdersQueryState.isLoading -> LoaderScreen()
 
-                                    Column {
-                                        CustomText(
-                                            "Order No: ${order.orderNo}",
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                        CustomText(
-                                            "Order Total: ${order.orderTotal}",
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                        CustomText(
-                                            "Order Status: ${order.orderStatus}",
-                                            fontWeight = FontWeight.Medium
-                                        )
+                        usersOrdersQueryState.errorMsg.isNotEmpty() -> ErrorScreen(
+                            usersOrdersQueryState.errorMsg
+                        )
 
-                                        order.orderItem.forEach { item ->
-                                            OrderItem(
-                                                orderItem = item,
-                                                onRateClickHandler = { id, ratingNumber ->
-                                                    ordersViewModel.onRatingHandler(
-                                                        productId = id,
-                                                        ratingNumber = ratingNumber
-                                                    )
-                                                },
-                                                onBuyAgainClickHandler = { id ->
-                                                    prodCartOrderSharedPreferenceViewModel.addToRecentlyViewed(id)
+                        usersOrdersQueryState.data != null -> {
+                            usersOrdersQueryState.data?.let { orderData ->
+                                if (orderData.data.isNotEmpty()) {
+                                    orderData.data.forEach { order ->
 
-                                                    navController.navigate(
-                                                        NavRoutes.ProductDetails(
-                                                            productId = id
+                                        Column {
+                                            CustomText(
+                                                "Order No: ${order.orderNo}",
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            CustomText(
+                                                "Order Total: ${order.orderTotal}",
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            CustomText(
+                                                "Order Status: ${order.orderStatus}",
+                                                fontWeight = FontWeight.Medium
+                                            )
+
+                                            order.orderItem.forEach { item ->
+                                                OrderItem(
+                                                    orderItem = item,
+                                                    onRateClickHandler = { id, ratingNumber ->
+                                                        ordersViewModel.onRatingHandler(
+                                                            productId = id,
+                                                            ratingNumber = ratingNumber
                                                         )
-                                                    )
-                                                })
+                                                    },
+                                                    onBuyAgainClickHandler = { id ->
+                                                        prodCartOrderSharedPreferenceViewModel.addToRecentlyViewed(
+                                                            id
+                                                        )
+
+                                                        navController.navigate(
+                                                            NavRoutes.ProductDetails(
+                                                                productId = id
+                                                            )
+                                                        )
+                                                    })
+                                            }
+
+                                            HorizontalDivider(
+                                                thickness = 1.dp,
+                                                modifier = Modifier.padding(vertical = 10.dp)
+                                            )
+
                                         }
 
-                                        HorizontalDivider(
-                                            thickness = 1.dp,
+                                    }
+                                } else {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        CustomText(
+                                            "You haven't made any orders yet",
+                                            textAlign = TextAlign.Center,
                                             modifier = Modifier.padding(vertical = 10.dp)
                                         )
-
                                     }
-
-                                }
-                            } else {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    CustomText(
-                                        "You haven't made any orders yet",
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.padding(vertical = 10.dp)
-                                    )
                                 }
                             }
                         }
                     }
-                }
 
+                }
             }
         }
     }

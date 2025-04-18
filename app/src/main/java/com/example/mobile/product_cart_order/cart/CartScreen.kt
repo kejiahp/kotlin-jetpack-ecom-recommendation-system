@@ -55,6 +55,7 @@ import com.example.mobile.core.LoaderButton
 import com.example.mobile.core.LoaderScreen
 import com.example.mobile.core.StickyTopNavbar
 import com.example.mobile.core.StyledOutlinedTextField
+import com.example.mobile.core.auth.SecureScreen
 import com.example.mobile.core.navigation.NavRoutes
 import com.example.mobile.product_cart_order.entity.CartItemPopulatedData
 import com.example.mobile.product_cart_order.preference.ProdCartOrderSharedPreferenceViewModel
@@ -72,208 +73,213 @@ fun CartScreen(navController: NavController, cartViewModel: CartViewModel = hilt
     val checkoutQueryState by cartViewModel.checkoutQueryState.collectAsState()
     val receiptFormState by cartViewModel.receiptFormState.collectAsState()
 
-    LaunchedEffect(addToCartQueryState) {
-        if (addToCartQueryState.errorMsg.isNotEmpty()) {
-            Toast.makeText(
-                toastCtx, addToCartQueryState.errorMsg, Toast.LENGTH_LONG
-            ).show()
+    SecureScreen(navController=navController) {
+        LaunchedEffect(addToCartQueryState) {
+            if (addToCartQueryState.errorMsg.isNotEmpty()) {
+                Toast.makeText(
+                    toastCtx, addToCartQueryState.errorMsg, Toast.LENGTH_LONG
+                ).show()
+            }
+            if (addToCartQueryState.data != null) {
+                cartViewModel.getUserCart()
+            }
         }
-        if (addToCartQueryState.data != null) {
-            cartViewModel.getUserCart()
+
+        LaunchedEffect(checkoutQueryState) {
+            if (checkoutQueryState.errorMsg.isNotEmpty()) {
+                Toast.makeText(
+                    toastCtx, checkoutQueryState.errorMsg, Toast.LENGTH_LONG
+                ).show()
+            }
+            if (checkoutQueryState.data != null) {
+                Toast.makeText(
+                    toastCtx, checkoutQueryState.data!!.message, Toast.LENGTH_LONG
+                ).show()
+
+                cartViewModel.getUserCart()
+
+                navController.navigate(NavRoutes.OrderScreen)
+            }
         }
-    }
 
-    LaunchedEffect(checkoutQueryState) {
-        if (checkoutQueryState.errorMsg.isNotEmpty()) {
-            Toast.makeText(
-                toastCtx, checkoutQueryState.errorMsg, Toast.LENGTH_LONG
-            ).show()
+        LaunchedEffect(emptyCartQueryState) {
+            if (emptyCartQueryState.errorMsg.isNotEmpty()) {
+                Toast.makeText(
+                    toastCtx, emptyCartQueryState.errorMsg, Toast.LENGTH_LONG
+                ).show()
+            }
+            if (emptyCartQueryState.data != null) {
+                cartViewModel.getUserCart()
+            }
         }
-        if (checkoutQueryState.data != null) {
-            Toast.makeText(
-                toastCtx, checkoutQueryState.data!!.message, Toast.LENGTH_LONG
-            ).show()
 
-            cartViewModel.getUserCart()
-
-            navController.navigate(NavRoutes.OrderScreen)
+        LaunchedEffect(removeFromCartQueryState) {
+            if (removeFromCartQueryState.errorMsg.isNotEmpty()) {
+                Toast.makeText(
+                    toastCtx, removeFromCartQueryState.errorMsg, Toast.LENGTH_LONG
+                ).show()
+            }
+            if (removeFromCartQueryState.data != null) {
+                cartViewModel.getUserCart()
+            }
         }
-    }
 
-    LaunchedEffect(emptyCartQueryState) {
-        if (emptyCartQueryState.errorMsg.isNotEmpty()) {
-            Toast.makeText(
-                toastCtx, emptyCartQueryState.errorMsg, Toast.LENGTH_LONG
-            ).show()
-        }
-        if (emptyCartQueryState.data != null) {
-            cartViewModel.getUserCart()
-        }
-    }
-
-    LaunchedEffect(removeFromCartQueryState) {
-        if (removeFromCartQueryState.errorMsg.isNotEmpty()) {
-            Toast.makeText(
-                toastCtx, removeFromCartQueryState.errorMsg, Toast.LENGTH_LONG
-            ).show()
-        }
-        if (removeFromCartQueryState.data != null) {
-            cartViewModel.getUserCart()
-        }
-    }
-
-
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column(
+        Surface(
             modifier = Modifier
-                .padding(10.dp)
                 .fillMaxSize()
         ) {
-            StickyTopNavbar(
-                navController = navController,
-            ) {
-                BackButtonWithTitle(
-                    title = "Cart",
-                    titleModifier = Modifier.fillMaxWidth(),
-                    maxLines = 1,
-                    titleOverflow = TextOverflow.Ellipsis
-                ) { navController.popBackStack() }
-            }
-
-
             Column(
                 modifier = Modifier
-                    .verticalScroll(scrollState)
-                    .weight(1f),
+                    .padding(10.dp)
+                    .fillMaxSize()
             ) {
+                StickyTopNavbar(
+                    navController = navController,
+                ) {
+                    BackButtonWithTitle(
+                        title = "Cart",
+                        titleModifier = Modifier.fillMaxWidth(),
+                        maxLines = 1,
+                        titleOverflow = TextOverflow.Ellipsis
+                    ) { navController.popBackStack() }
+                }
 
-                when {
 
-                    userCartQueryState.isLoading -> LoaderScreen()
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(scrollState)
+                        .weight(1f),
+                ) {
 
-                    userCartQueryState.errorMsg.isNotEmpty() -> ErrorScreen(userCartQueryState.errorMsg)
+                    when {
 
-                    userCartQueryState.data != null -> {
-                        userCartQueryState.data?.let { userCartData ->
-                            if (userCartData.data.cartItems.isNotEmpty()) {
-                                userCartData.data.cartItems.forEach { cartItem ->
-                                    CartItem(
-                                        cartItem = cartItem,
-                                        onNavigateHandler = { id ->
-                                            prodCartOrderSharedPreferenceViewModel.addToRecentlyViewed(
-                                                id
-                                            )
+                        userCartQueryState.isLoading -> LoaderScreen()
 
-                                            navController.navigate(
-                                                NavRoutes.ProductDetails(
-                                                    productId = id
+                        userCartQueryState.errorMsg.isNotEmpty() -> ErrorScreen(userCartQueryState.errorMsg)
+
+                        userCartQueryState.data != null -> {
+                            userCartQueryState.data?.let { userCartData ->
+                                if (userCartData.data.cartItems.isNotEmpty()) {
+                                    userCartData.data.cartItems.forEach { cartItem ->
+                                        CartItem(
+                                            cartItem = cartItem,
+                                            onNavigateHandler = { id ->
+                                                prodCartOrderSharedPreferenceViewModel.addToRecentlyViewed(
+                                                    id
                                                 )
-                                            )
-                                        },
-                                        onQtyIncrease = { id, qty ->
-                                            if (!addToCartQueryState.isLoading) {
-                                                if (qty < 100) {
-                                                    cartViewModel.addToCartHandler(id, 1, "ADD")
-                                                }
-                                            }
-                                        },
-                                        onQtyDecrease = { id, qty ->
-                                            if (!addToCartQueryState.isLoading) {
-                                                if (qty > 1) {
-                                                    cartViewModel.addToCartHandler(id, 1, "REMOVE")
-                                                }
-                                            }
-                                        },
-                                        onRemoveFromCart = { id ->
-                                            if (!removeFromCartQueryState.isLoading) {
-                                                cartViewModel.removeItemFromCart(id)
-                                            }
-                                        }
-                                    )
-                                }
-                            } else {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    CustomText(
-                                        "Oops...This cart is empty, add some items to it.",
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.padding(vertical = 10.dp)
-                                    )
-                                }
-                            }
 
-                            if (userCartData.data.cartItems.isNotEmpty()) {
-                                TextButton(onClick = { if (!emptyCartQueryState.isLoading) cartViewModel.emptyCart() }) {
-                                    if (emptyCartQueryState.isLoading) {
-                                        Loader()
-                                    } else {
-                                        CustomText("Empty Cart")
+                                                navController.navigate(
+                                                    NavRoutes.ProductDetails(
+                                                        productId = id
+                                                    )
+                                                )
+                                            },
+                                            onQtyIncrease = { id, qty ->
+                                                if (!addToCartQueryState.isLoading) {
+                                                    if (qty < 100) {
+                                                        cartViewModel.addToCartHandler(id, 1, "ADD")
+                                                    }
+                                                }
+                                            },
+                                            onQtyDecrease = { id, qty ->
+                                                if (!addToCartQueryState.isLoading) {
+                                                    if (qty > 1) {
+                                                        cartViewModel.addToCartHandler(
+                                                            id,
+                                                            1,
+                                                            "REMOVE"
+                                                        )
+                                                    }
+                                                }
+                                            },
+                                            onRemoveFromCart = { id ->
+                                                if (!removeFromCartQueryState.isLoading) {
+                                                    cartViewModel.removeItemFromCart(id)
+                                                }
+                                            }
+                                        )
+                                    }
+                                } else {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        CustomText(
+                                            "Oops...This cart is empty, add some items to it.",
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.padding(vertical = 10.dp)
+                                        )
+                                    }
+                                }
+
+                                if (userCartData.data.cartItems.isNotEmpty()) {
+                                    TextButton(onClick = { if (!emptyCartQueryState.isLoading) cartViewModel.emptyCart() }) {
+                                        if (emptyCartQueryState.isLoading) {
+                                            Loader()
+                                        } else {
+                                            CustomText("Empty Cart")
+                                        }
                                     }
                                 }
                             }
                         }
+
+                    }
+                }
+
+                CustomText(
+                    "Your receipt will be sent to the email provided.",
+                    fontSize = 10.sp,
+                    lineHeight = 10.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                CustomText(
+                    "If you can't find the receipt check your spam.",
+                    fontSize = 10.sp,
+                    lineHeight = 10.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(0.6f)) {
+                        // Email Input Field
+                        StyledOutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = receiptFormState.email,
+                            enabled = userCartQueryState.data != null && userCartQueryState.data!!.data.cartItems.isNotEmpty(),
+                            textFieldError = receiptFormState.emailError,
+                            imgVec = Icons.Default.Email,
+                            keyboardOpt = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            onChange = cartViewModel::onEmailChangeHandler,
+                            label = { CustomText("Email") },
+                            placeholder = { CustomText("Enter your Email", fontSize = 12.sp) },
+                            emptyFieldHandler = {
+                                cartViewModel.onEmailChangeHandler("")
+                            })
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    LoaderButton(
+                        enabled = userCartQueryState.data != null && userCartQueryState.data!!.data.cartItems.isNotEmpty(),
+                        isLoading = checkoutQueryState.isLoading,
+                        onClickBtn = cartViewModel::onCheckoutHandler,
+                        modifier = Modifier
+                            .height(50.dp)
+                            .weight(0.4f)
+                    ) {
+                        CustomText("Checkout")
                     }
 
                 }
             }
-
-            CustomText(
-                "Your receipt will be sent to the email provided.",
-                fontSize = 10.sp,
-                lineHeight = 10.sp,
-                fontWeight = FontWeight.Medium
-            )
-            CustomText(
-                "If you can't find the receipt check your spam.",
-                fontSize = 10.sp,
-                lineHeight = 10.sp,
-                fontWeight = FontWeight.Medium
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(0.6f)) {
-                    // Email Input Field
-                    StyledOutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = receiptFormState.email,
-                        enabled = userCartQueryState.data != null && userCartQueryState.data!!.data.cartItems.isNotEmpty(),
-                        textFieldError = receiptFormState.emailError,
-                        imgVec = Icons.Default.Email,
-                        keyboardOpt = KeyboardOptions(keyboardType = KeyboardType.Email),
-                        onChange = cartViewModel::onEmailChangeHandler,
-                        label = { CustomText("Email") },
-                        placeholder = { CustomText("Enter your Email", fontSize = 12.sp) },
-                        emptyFieldHandler = {
-                            cartViewModel.onEmailChangeHandler("")
-                        })
-                }
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                LoaderButton(
-                    enabled = userCartQueryState.data != null && userCartQueryState.data!!.data.cartItems.isNotEmpty(),
-                    isLoading = checkoutQueryState.isLoading,
-                    onClickBtn = cartViewModel::onCheckoutHandler,
-                    modifier = Modifier
-                        .height(50.dp)
-                        .weight(0.4f)
-                ) {
-                    CustomText("Checkout")
-                }
-
-            }
         }
+
     }
 }
 

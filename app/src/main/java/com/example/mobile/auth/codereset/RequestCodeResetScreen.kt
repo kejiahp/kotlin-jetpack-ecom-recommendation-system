@@ -32,6 +32,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mobile.core.BackButtonWithTitle
 import com.example.mobile.core.LoaderButton
+import com.example.mobile.core.auth.RedirectToHomeScreen
 import com.example.mobile.core.navigation.NavRoutes
 
 @Composable
@@ -44,82 +45,88 @@ fun RequestCondeResetScreen(
     val requestCodeResetFormState by codeResetViewModel.requestCodeResetFormState.collectAsState()
     val requestCodeResetQueryState by codeResetViewModel.requestCodeResetQueryState.collectAsState()
 
-    LaunchedEffect(requestCodeResetQueryState) {
-        // Show error message on request for reset code fail
-        if (requestCodeResetQueryState.errorMsg.isNotEmpty()) {
-            Toast.makeText(
-                toastCtx, requestCodeResetQueryState.errorMsg, Toast.LENGTH_LONG
-            ).show()
-        }
-        // show message on request for reset code success
-        if (requestCodeResetQueryState.data != null) {
-            Toast.makeText(toastCtx, requestCodeResetQueryState.data!!.message, Toast.LENGTH_LONG)
-                .show()
-            navController.navigate(NavRoutes.CodeResetScreen)
-        }
-    }
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(scrollState)
-                .padding(10.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                BackButtonWithTitle(
-                    "Request Reset Token",
-                    onBackClick = { navController.popBackStack() })
-
-                CustomText(
-                    text = "Enter your username and email address, if the provided username exists in the system code reset token will be sent to the provided email address.",
-                    fontSize = 14.sp
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                StyledOutlinedTextField(modifier = Modifier.fillMaxWidth(),
-                    textFieldError = requestCodeResetFormState.usernameError,
-                    value = requestCodeResetFormState.username,
-                    imgVec = Icons.Default.Person,
-                    onChange = codeResetViewModel::onRequestCodeUsernameChangeHandler,
-                    label = { CustomText("Username") },
-                    placeholder = { CustomText("Enter your Username") },
-                    emptyFieldHandler = {
-                        codeResetViewModel.onRequestCodeUsernameChangeHandler("")
-                    })
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                StyledOutlinedTextField(modifier = Modifier.fillMaxWidth(),
-                    textFieldError = requestCodeResetFormState.emailError,
-                    value = requestCodeResetFormState.email,
-                    imgVec = Icons.Default.Email,
-                    onChange = codeResetViewModel::onRequestCodeEmailChangeHandler,
-                    label = { CustomText("Email") },
-                    placeholder = { CustomText("Enter your Email") },
-                    emptyFieldHandler = {
-                        codeResetViewModel.onRequestCodeEmailChangeHandler("")
-                    })
+    RedirectToHomeScreen(navController) {
+        LaunchedEffect(requestCodeResetQueryState) {
+            // Show error message on request for reset code fail
+            if (requestCodeResetQueryState.errorMsg.isNotEmpty()) {
+                Toast.makeText(
+                    toastCtx, requestCodeResetQueryState.errorMsg, Toast.LENGTH_LONG
+                ).show()
             }
+            // show message on request for reset code success
+            if (requestCodeResetQueryState.data != null) {
+                Toast.makeText(
+                    toastCtx,
+                    requestCodeResetQueryState.data!!.message,
+                    Toast.LENGTH_LONG
+                )
+                    .show()
+                navController.navigate(NavRoutes.CodeResetScreen)
+            }
+        }
 
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .verticalScroll(scrollState)
+                    .padding(10.dp)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                if (requestCodeResetQueryState.errorMsg.isNotEmpty()) {
-                    CustomText(requestCodeResetQueryState.errorMsg, color = Color.Red)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    BackButtonWithTitle(
+                        "Request Reset Token",
+                        onBackClick = { navController.popBackStack() })
+
+                    CustomText(
+                        text = "Enter your username and email address, if the provided username exists in the system code reset token will be sent to the provided email address.",
+                        fontSize = 14.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    StyledOutlinedTextField(modifier = Modifier.fillMaxWidth(),
+                        textFieldError = requestCodeResetFormState.usernameError,
+                        value = requestCodeResetFormState.username,
+                        imgVec = Icons.Default.Person,
+                        onChange = codeResetViewModel::onRequestCodeUsernameChangeHandler,
+                        label = { CustomText("Username") },
+                        placeholder = { CustomText("Enter your Username") },
+                        emptyFieldHandler = {
+                            codeResetViewModel.onRequestCodeUsernameChangeHandler("")
+                        })
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    StyledOutlinedTextField(modifier = Modifier.fillMaxWidth(),
+                        textFieldError = requestCodeResetFormState.emailError,
+                        value = requestCodeResetFormState.email,
+                        imgVec = Icons.Default.Email,
+                        onChange = codeResetViewModel::onRequestCodeEmailChangeHandler,
+                        label = { CustomText("Email") },
+                        placeholder = { CustomText("Enter your Email") },
+                        emptyFieldHandler = {
+                            codeResetViewModel.onRequestCodeEmailChangeHandler("")
+                        })
                 }
 
-                LoaderButton(
-                    isLoading = requestCodeResetQueryState.isLoading,
-                    onClickBtn = codeResetViewModel::onRequestCodeSubmitHandler
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CustomText("Send code", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    if (requestCodeResetQueryState.errorMsg.isNotEmpty()) {
+                        CustomText(requestCodeResetQueryState.errorMsg, color = Color.Red)
+                    }
+
+                    LoaderButton(
+                        isLoading = requestCodeResetQueryState.isLoading,
+                        onClickBtn = codeResetViewModel::onRequestCodeSubmitHandler
+                    ) {
+                        CustomText("Send code", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
             }
         }

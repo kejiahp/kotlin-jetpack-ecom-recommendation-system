@@ -41,6 +41,7 @@ import com.example.mobile.core.LoaderButton
 import com.example.mobile.core.PasswordTextField
 import com.example.mobile.core.StyledOutlinedTextField
 import com.example.mobile.core.auth.AuthViewModel
+import com.example.mobile.core.auth.RedirectToHomeScreen
 import com.example.mobile.core.navigation.NavRoutes
 
 
@@ -55,110 +56,122 @@ fun LoginScreen(
     val formState by loginViewModel.formState.collectAsState()
     val isLoading by loginViewModel.isLoading.collectAsState()
     val errorMsg by loginViewModel.errorMsg.collectAsState()
-    val authUser by authViewModel.authUser.collectAsState()
 
-    // Show error message on signup fail
-    LaunchedEffect(errorMsg) {
-        if (errorMsg.isNotEmpty()) {
-            Toast.makeText(
-                toastCtx,
-                errorMsg,
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    // Show message on signup success
-    resData?.let {
-        LaunchedEffect(it) {
-            if (it.message.isNotEmpty()) {
+    RedirectToHomeScreen(navController) {
+        // Show error message on signup fail
+        LaunchedEffect(errorMsg) {
+            if (errorMsg.isNotEmpty()) {
                 Toast.makeText(
                     toastCtx,
-                    it.message,
+                    errorMsg,
                     Toast.LENGTH_LONG
                 ).show()
             }
-            if (it.success) {
-                // update authenticated user data
-                authViewModel.updateAuthUser(it.data)
+        }
 
-                // navigate to product listing screen
-                navController.navigate(NavRoutes.ProductHomeScreen)
+        // Show message on signup success
+        resData?.let {
+            LaunchedEffect(it) {
+                if (it.message.isNotEmpty()) {
+                    Toast.makeText(
+                        toastCtx,
+                        it.message,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                if (it.success) {
+                    // update authenticated user data
+                    authViewModel.updateAuthUser(it.data)
+
+                    // navigate to product listing screen
+                    navController.navigate(NavRoutes.ProductHomeScreen)
+                }
             }
         }
-    }
 
 
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(10.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        CustomText(
+                            text = "Login",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        IconButton(onClick = { navController.navigate(NavRoutes.ProductHomeScreen) }) {
+                            Icon(
+                                imageVector = Icons.Default.Home,
+                                contentDescription = "Home",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(5.dp))
+                    CustomText(
+                        text = "Enter your username and code, sent to your email address to continue",
+                        fontSize = 14.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    StyledOutlinedTextField(modifier = Modifier.fillMaxWidth(),
+                        textFieldError = formState.usernameError,
+                        value = formState.username,
+                        imgVec = Icons.Default.Person,
+                        onChange = loginViewModel::onUsernameChangeHandler,
+                        label = { CustomText("Username") },
+                        placeholder = { CustomText("Enter your Username") },
+                        emptyFieldHandler = {
+                            loginViewModel.onUsernameChangeHandler("")
+                        })
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    PasswordTextField(
+                        textFieldError = formState.codeError,
+                        labelText = "Code",
+                        placeholderText = "Enter your Code",
+                        password = formState.code,
+                        onChangePassword = loginViewModel::onCodeChangeHandler
+                    )
+                }
+
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CustomText(text = "Login", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
-
-                    IconButton(onClick = { navController.navigate(NavRoutes.ProductHomeScreen) }) {
-                        Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = "Home",
-                            tint = MaterialTheme.colorScheme.primary
+                    if (errorMsg.isNotEmpty()) {
+                        CustomText(errorMsg, color = Color.Red)
+                    }
+                    LoaderButton(
+                        isLoading = isLoading,
+                        onClickBtn = { loginViewModel.onLoginHandler() }
+                    ) {
+                        CustomText("Login", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+                    TextButton(onClick = { navController.navigate(NavRoutes.SignUp) }) {
+                        CustomText(
+                            "Don't have an account?"
                         )
                     }
-                }
-                Spacer(modifier = Modifier.height(5.dp))
-                CustomText(
-                    text = "Enter your username and code, sent to your email address to continue",
-                    fontSize = 14.sp
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                StyledOutlinedTextField(modifier = Modifier.fillMaxWidth(),
-                    textFieldError = formState.usernameError,
-                    value = formState.username,
-                    imgVec = Icons.Default.Person,
-                    onChange = loginViewModel::onUsernameChangeHandler,
-                    label = { CustomText("Username") },
-                    placeholder = { CustomText("Enter your Username") },
-                    emptyFieldHandler = {
-                        loginViewModel.onUsernameChangeHandler("")
-                    })
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                PasswordTextField(
-                    textFieldError = formState.codeError,
-                    labelText = "Code",
-                    placeholderText = "Enter your Code",
-                    password = formState.code,
-                    onChangePassword = loginViewModel::onCodeChangeHandler
-                )
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                if (errorMsg.isNotEmpty()) {
-                    CustomText(errorMsg, color = Color.Red)
-                }
-                LoaderButton(
-                    isLoading = isLoading,
-                    onClickBtn = { loginViewModel.onLoginHandler() }
-                ) {
-                    CustomText("Login", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                }
-                TextButton(onClick = { navController.navigate(NavRoutes.SignUp) }) { CustomText("Don't have an account?") }
-                TextButton(onClick = { navController.navigate(NavRoutes.RequestCondeResetScreen) }) {
-                    CustomText(
-                        "Forgot your code?"
-                    )
+                    TextButton(onClick = { navController.navigate(NavRoutes.RequestCondeResetScreen) }) {
+                        CustomText(
+                            "Forgot your code?"
+                        )
+                    }
                 }
             }
         }
