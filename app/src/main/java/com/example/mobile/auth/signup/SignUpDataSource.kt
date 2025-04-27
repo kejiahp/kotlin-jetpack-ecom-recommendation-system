@@ -8,6 +8,4 @@ import retrofit2.Response
  * */
 interface SignUpDataSource {
     fun registerUser(registerUserData: RegisterRequest): Call<RegisterResponse>
-
-//    suspend fun getData(name: String): Response<registerUser>
 }

@@ -4,11 +4,6 @@ import com.example.mobile.core.ApiResponse
 import com.google.gson.annotations.SerializedName
 
 // This data class defines the shape of the JSON object
-//data class CountryItem(val country_id: String, val probability: Double)
-//data class CountryResponse(val count: Number, val name: String, val country: List<CountryItem>)
-
-
-// This data class defines the shape of the JSON object
 data class RegisterData(
     val id: String,
     val username: String,
