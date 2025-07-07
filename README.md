@@ -36,5 +36,9 @@ StateFlow or LiveData, allowing the View to react automatically to data changes.
 #### Model-View-ViewModel Architecture Pattern
 ![mvvm drawio (1)](https://github.com/user-attachments/assets/c76f4806-50a9-4310-b7f0-2dca9b165bed)
 
+
+#### Product Listing Page
+<img width="247" alt="product_list_screen" src="https://github.com/user-attachments/assets/c37da388-2b12-4a61-a6c7-7660272dd079" />
+
 #### Running Locally?
 - Use Android studio, preferrably (`Ladybug | 2024.2.1	3.2-8.7`)
